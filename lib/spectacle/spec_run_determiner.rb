@@ -27,7 +27,7 @@ module Spectacle
         end
       end
 
-      $stdout.puts "'#{spec_files.to_a.sort.join(",")}'"
+      spec_files.to_a.sort
     end
 
     private
