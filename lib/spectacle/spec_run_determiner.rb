@@ -11,6 +11,10 @@ module Spectacle
   class SpecRunDeterminer
     include Spectacle::HelperMethods
 
+    def self.determine!
+      new.determine!
+    end
+
     def determine!
       dependencies = read_file(File.join(OUTPUT_DIRECTORY, "dependencies.json.gz"))
 

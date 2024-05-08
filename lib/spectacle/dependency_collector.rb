@@ -30,6 +30,10 @@ module Spectacle
 
     OUTPUT_FILE_PATH = File.join(OUTPUT_DIRECTORY, "dependencies.json.gz")
 
+    def self.collect!
+      new.collect!
+    end
+
     def initialize
       @inverse_spec_dependencies = Hash.new { |h, k| h[k] = Set.new }
     end
