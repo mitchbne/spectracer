@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "pattern_templates": {
+      "type": "object",
+      "properties": {
+        "all_specs": {
+          "type": "string"
+        },
+        "no_specs": {
+          "type": "string"
+        }
+      },
+      "required": ["all_specs", "no_specs"]
+    },
+    "on_empty_spec_set": {
+      "type": "string"
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["pattern_templates", "on_empty_spec_set"]
+}

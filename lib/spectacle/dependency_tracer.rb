@@ -42,8 +42,6 @@ module Spectacle
       end
 
       write_object_to_gzipped_json(output_json, OUTPUT_FILE_PATH)
-
-      nil
     end
 
     def current_spec_file=(file)
