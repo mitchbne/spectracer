@@ -5,6 +5,7 @@ require_relative "spectacle/output_directory"
 require_relative "spectacle/dependency_tracer"
 require_relative "spectacle/dependency_collector"
 require_relative "spectacle/spec_run_determiner"
+require_relative "spectacle/railtie" if defined?(Rails)
 
 module Spectacle
   class Error < StandardError; end
