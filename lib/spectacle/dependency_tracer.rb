@@ -16,10 +16,6 @@ module Spectacle
   class DependencyTracer
     include Spectacle::HelperMethods
 
-    BUILD_ID = ENV["BUILDKITE_BUILD_ID"] || "local"
-    JOB_ID = ENV["BUILDKITE_JOB_ID"] || "local"
-    OUTPUT_FILE_PATH = File.join(OUTPUT_DIRECTORY, "outputs", BUILD_ID, "#{JOB_ID}.json.gz")
-
     def initialize
       @current_spec_file = nil
       @spec_file_dependencies = Hash.new { |h, k| h[k] = Set.new }
@@ -41,7 +37,7 @@ module Spectacle
         return
       end
 
-      write_object_to_gzipped_json(output_json, OUTPUT_FILE_PATH)
+      write_object_to_gzipped_json(output_json, SPEC_ARTIFACT_OUTPUT_FILE_PATH)
     end
 
     def current_spec_file=(file)

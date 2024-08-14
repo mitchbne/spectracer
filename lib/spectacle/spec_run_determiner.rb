@@ -68,12 +68,12 @@ module Spectacle
     private
 
     def load_dependencies_file!
-      unless File.exist?(File.join(OUTPUT_DIRECTORY, "dependencies.json.gz"))
-        $stderr.puts "No dependencies file found at #{File.join(OUTPUT_DIRECTORY, "dependencies.json.gz").inspect}." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+      unless File.exist?(COLLECTED_DEPENDENCIES_FILE)
+        $stderr.puts "No dependencies file found at #{COLLECTED_DEPENDENCIES_FILE.inspect}." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
         return
       end
 
-      @dependencies = read_file(File.join(OUTPUT_DIRECTORY, "dependencies.json.gz"))
+      @dependencies = read_file(COLLECTED_DEPENDENCIES_FILE)
     end
 
     def load_configuration_file!
