@@ -4,6 +4,7 @@ require_relative "spectacle/version"
 require_relative "spectacle/dependency_tracer"
 require_relative "spectacle/dependency_collector"
 require_relative "spectacle/spec_run_determiner"
+require_relative "spectacle/download_dependencies_json"
 require_relative "spectacle/railtie" if defined?(Rails)
 
 module Spectacle

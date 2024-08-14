@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spectacle (0.1.0)
+    spectacle (0.1.2)
 
 GEM
   remote: https://rubygems.org/

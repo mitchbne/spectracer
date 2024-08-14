@@ -42,4 +42,9 @@ namespace :spectacle do
   task :spec_determiner do
     puts "'#{Spectacle::SpecRunDeterminer.determine!}'"
   end
+
+  desc "Download dependencies.json.gz"
+  task :download_dependencies do
+    Spectacle::DownloadDependenciesJson.download
+  end
 end
