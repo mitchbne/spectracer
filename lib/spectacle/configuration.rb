@@ -4,18 +4,18 @@ require 'json'
 # The .spectacle.yml file should be placed in the root of the repository.
 # It looks like this:
 # ---
-# pattern_templates:
+# defaults:
 #   all_specs: String
 #   no_specs: String
 
 # on_empty_spec_set: String
 
-# config:
+# globs_matcher:
 #   <String>: String
 
-# The pattern_templates are used to define patterns that can be used in the config section, and are templated into mustache templates.
+# The defaults are used to define patterns that can be used in the globs_matcher section, and are templated into mustache templates.
 # The on_empty_spec_set is a mustache template that is used to determine what to run if no specs are found.
-# The config section is a list of files or directories that are mapped to a pattern template.
+# The globs_matcher section is a list of files or directories that are mapped to a pattern template.
 
 module Spectacle
   class Configuration
@@ -38,19 +38,19 @@ module Spectacle
 
       file = YAML.load_file(FILE_PATH)
 
-      pattern_templates = file.delete("pattern_templates")
+      defaults = file.delete("defaults")
       on_empty_spec_set = file.delete("on_empty_spec_set")
-      config = file.delete("config")
+      globs_matcher = file.delete("globs_matcher")
 
       configuration = {}
 
       configuration[:on_empty_spec_set] = on_empty_spec_set.gsub(/{{(.*?)}}/) do
-        pattern_templates[$1]
+        defaults[$1]
       end
 
-      configuration[:globs] = config.each_with_object({}) do |(key, value), hash|
+      configuration[:globs] = globs_matcher.each_with_object({}) do |(key, value), hash|
         hash[key] = value.gsub(/{{(.*?)}}/) do
-          pattern_templates[$1]
+          defaults[$1]
         end
       end
 
