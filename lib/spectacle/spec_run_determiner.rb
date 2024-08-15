@@ -45,7 +45,7 @@ module Spectacle
           @spec_files.merge(@dependencies[file])
         end
 
-        @configuration[:globs].each do |glob, pattern|
+        @configuration[:globs_matcher].each do |glob, pattern|
           glob = glob.gsub("./", "") if glob.start_with?("./")
 
           if File.fnmatch?(glob, file)
