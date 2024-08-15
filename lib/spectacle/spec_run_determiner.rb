@@ -69,11 +69,11 @@ module Spectacle
 
     def load_dependencies_file!
       unless File.exist?(COLLECTED_DEPENDENCIES_FILE)
-        $stderr.puts "No dependencies file found at #{COLLECTED_DEPENDENCIES_FILE.inspect}." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+        $stderr.puts "No dependencies file found at #{Spectacle::COLLECTED_DEPENDENCIES_FILE.inspect}." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
         return
       end
 
-      @dependencies = read_file(COLLECTED_DEPENDENCIES_FILE)
+      @dependencies = read_file(Spectacle::COLLECTED_DEPENDENCIES_FILE)
     end
 
     def load_configuration_file!

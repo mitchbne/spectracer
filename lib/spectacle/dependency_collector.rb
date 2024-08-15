@@ -37,7 +37,7 @@ module Spectacle
     end
 
     def collect!
-      Dir.glob("#{SPEC_DEPENDENCY_OUTPUTS_DIRECTORY}/**/*.json.gz").each do |file|
+      Dir.glob("#{Spectacle::SPEC_DEPENDENCY_OUTPUTS_DIRECTORY}/**/*.json.gz").each do |file|
         data = read_file(file)
 
         data.each do |spec_file, dependencies|

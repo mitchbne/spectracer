@@ -43,7 +43,7 @@ module Spectacle
         puts "Build ID: '#{build_id}'"
       end
 
-      system("buildkite-agent artifact download '#{COLLECTED_DEPENDENCIES_FILE}' . --build '#{build_id}'")
+      system("buildkite-agent artifact download '#{Spectacle::COLLECTED_DEPENDENCIES_FILE}' . --build '#{build_id}'")
     end
   end
 end

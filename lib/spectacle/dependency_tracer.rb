@@ -37,7 +37,7 @@ module Spectacle
         return
       end
 
-      write_object_to_gzipped_json(output_json, SPEC_ARTIFACT_OUTPUT_FILE_PATH)
+      write_object_to_gzipped_json(output_json, Spectacle::SPEC_ARTIFACT_OUTPUT_FILE_PATH)
     end
 
     def current_spec_file=(file)
