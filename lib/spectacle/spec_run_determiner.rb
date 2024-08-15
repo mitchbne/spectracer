@@ -25,20 +25,21 @@ module Spectacle
     def determine!
       load_dependencies_file!
       load_configuration_file!
+      load_changed_files!
 
       if ENV["WITH_SPECTACLE_DEBUG"] == "true"
         $stderr.puts "Configuration:"
         $stderr.puts JSON.pretty_generate(@configuration)
 
         $stderr.puts "Changed files:"
-        changed_files.each do |file|
+        @changed_files.each do |file|
           $stderr.puts "  - #{file}"
         end
 
         $stderr.puts ""
       end
 
-      changed_files.each do |file|
+      @changed_files.each do |file|
         @spec_files.add(file) if file.end_with?("_spec.rb") # Also run the spec file itself if it has changed
 
         if @dependencies[file]
@@ -80,19 +81,19 @@ module Spectacle
       @configuration = Spectacle::Configuration.load!
     end
 
-    def changed_files
-      @changed_files ||= begin
+    def load_changed_files!
+      @changed_files = begin
         # Assume we're on a branch first that should be compared to origin/main
         changed_files = `git diff --cached --merge-base origin/main --name-only`.split("\n")
 
         # If the list of changed files is empty, and we're on Buildkite, we could probably use the BUILDKITE_COMMIT environment variable
         if changed_files.empty? && ENV["BUILDKITE_COMMIT"]
-          changed_files = `git diff --cached $BUILDKITE_COMMIT --name-only`.split("\n")
+          changed_files = "git diff --cached $BUILDKITE_COMMIT --name-only".split("\n")
         end
 
         # If the list of changed files is empty, we probably should just use the last commit
         if changed_files.empty?
-          changed_files = `git diff --cached HEAD~1 --name-only`.split("\n")
+          changed_files = "git diff --cached HEAD~1 --name-only".split("\n")
         end
 
         changed_files
