@@ -21,14 +21,14 @@ namespace :spectacle do
           no_specs_glob: "{}"
 
         # When no spec files are detected to run, Spectacle will run the specs defined in the 'on_empty_spec_set' key.
-        on_empty_spec_set: "{{no_specs}}"
+        on_empty_spec_set: "{{no_specs_glob}}"
 
         # If a file changes and it matches the glob, the corresponding pattern will be added to the list of spec files to run.
         # These will take precedence over the 'on_empty_spec_set' key.
         globs_matcher:
-          "Gemfile": "{{all_specs}}"
-          "Gemfile.lock": "{{all_specs}}"
-          "config/**": "{{all_specs}}"
+          "Gemfile": "{{all_specs_glob}}"
+          "Gemfile.lock": "{{all_specs_glob}}"
+          "config/**": "{{all_specs_glob}}"
       YAML
     end
   end
