@@ -50,7 +50,7 @@ module Spectacle
       # Sort the dependencies for each file so that the output is deterministic
       @inverse_spec_dependencies.each { |k, v| @inverse_spec_dependencies[k] = v.sort.to_a }
 
-      write_object_to_gzipped_json(@inverse_spec_dependencies, COLLECTED_DEPENDENCIES_FILE)
+      write_object_to_gzipped_json(@inverse_spec_dependencies, Spectacle::COLLECTED_DEPENDENCIES_FILE)
 
       nil
     end
