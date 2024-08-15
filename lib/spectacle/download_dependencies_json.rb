@@ -33,9 +33,10 @@ module Spectacle
       puts "Downloading dependencies.json.gz..."
 
       build_id = nil
+      organization_slug = ENV["BUILDKITE_ORGANIZATION_SLUG"]
 
       Net::HTTP.start("api.buildkite.com", use_ssl: true) do |http|
-        request = Net::HTTP::Get.new("/v2/organizations/#{org_slug}/pipelines/#{pipeline_slug}/builds?per_page=1")
+        request = Net::HTTP::Get.new("/v2/organizations/#{organization_slug}/pipelines/#{pipeline_slug}/builds?per_page=1")
         request["Authorization"] = "Bearer #{token}"
         response = http.request(request)
 
