@@ -1,5 +1,6 @@
 require 'zlib'
 require 'json'
+require 'open3'
 
 require_relative "./helper_methods"
 require_relative "./configuration"
@@ -42,8 +43,14 @@ module Spectacle
       @changed_files.each do |file|
         @spec_files.add(file) if file.end_with?("_spec.rb") # Also run the spec file itself if it has changed
 
-        if @dependencies[file]
-          @spec_files.merge(@dependencies[file])
+        file_key = "./#{file}"
+        if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+          puts "Checking dependencies for '#{file_key}'..."
+          puts "dependencies.json keys: #{@dependencies.keys}"
+        end
+
+        if spec_files = @dependencies[file_key]
+          @spec_files.merge(spec_files)
         end
 
         @configuration[:globs].each do |glob, pattern|
@@ -64,6 +71,8 @@ module Spectacle
       else
         files.join(",")
       end
+    rescue => e
+      puts e.backtrace
     end
 
     private
@@ -83,21 +92,26 @@ module Spectacle
 
     def load_changed_files!
       @changed_files = begin
-        # Assume we're on a branch first that should be compared to origin/main
-        changed_files = `git diff --cached --merge-base origin/main --name-only`.split("\n")
+        default_branch = ENV.fetch("BUILDKITE_PIPELINE_DEFAULT_BRANCH", "main")
+        current_branch = ENV.fetch("BUILDKITE_BRANCH", system_command("git rev-parse --abbrev-ref HEAD"))
 
-        # If the list of changed files is empty, and we're on Buildkite, we could probably use the BUILDKITE_COMMIT environment variable
-        if changed_files.empty? && ENV["BUILDKITE_COMMIT"]
-          changed_files = "git diff --cached $BUILDKITE_COMMIT --name-only".split("\n")
+        if current_branch == default_branch
+          # Get the latest commit on the current branch
+          latest_commit = system_command("git rev-parse #{current_branch}")
+          $stderr.puts "Latest commit SHA: #{latest_commit}" if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+          system_command("git diff-tree --no-commit-id --name-only #{latest_commit} -r").split("\n")
+        else
+          # Get the changed files between the current branch and the default branch
+          system_command("git diff --cached origin/#{default_branch} --name-only").split("\n")
         end
-
-        # If the list of changed files is empty, we probably should just use the last commit
-        if changed_files.empty?
-          changed_files = "git diff --cached HEAD~1 --name-only".split("\n")
-        end
-
-        changed_files
       end
+    end
+
+    def system_command(command)
+      $stderr.puts "Running command: '#{command}'" if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+
+      stdout_str, _, _ = Open3.capture3(command)
+      return stdout_str.chomp
     end
   end
 end
