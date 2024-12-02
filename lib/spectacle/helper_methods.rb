@@ -39,6 +39,9 @@ module Spectacle
       else
         {}
       end
+    rescue JSON::ParserError
+      $stderr.puts "Failed to parse JSON file: #{file_path}"
+      {}
     end
   end
 end
