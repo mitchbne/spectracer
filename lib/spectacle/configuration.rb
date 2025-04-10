@@ -20,6 +20,7 @@ require 'json'
 module Spectacle
   class Configuration
     FILE_PATH = File.join(".spectacle.yml").freeze
+    DEFAULT_FILE_PATH = File.join(Pathname.new(__dir__).join("..", "spectacle.default.yml")).freeze
 
     def intialize
       @dependencies = nil
@@ -32,11 +33,7 @@ module Spectacle
     end
 
     def load!
-      unless File.exist?(FILE_PATH)
-        raise "No configuration file found at #{FILE_PATH.inspect}."
-      end
-
-      file = YAML.load_file(FILE_PATH)
+      file = load_configuration_file!
 
       defaults = file.delete("defaults")
       on_empty_spec_set = file.delete("on_empty_spec_set")
@@ -60,12 +57,14 @@ module Spectacle
     private
 
     def load_configuration_file!
-      unless File.exist?(FILE_PATH)
-        $stderr.puts "No configuration file found at #{FILE_PATH.inspect}." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
-        return
+      if File.exist?(FILE_PATH)
+        YAML.load_file(FILE_PATH)
+      else
+        $stderr.puts "No configuration file found at #{FILE_PATH.inspect}. Falling back to defaults" if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+        YAML.safe_load(File.read(DEFAULT_FILE_PATH))
       end
-
-      @configuration = YAML.load_file(FILE_PATH)
+    rescue => e
+      $stderr.puts "Error loading configuration file: #{e.message}"
     end
 
     def changed_files

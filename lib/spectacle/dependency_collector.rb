@@ -32,25 +32,23 @@ module Spectacle
       new.collect!
     end
 
-    def initialize
-      @inverse_spec_dependencies = Hash.new { |h, k| h[k] = Set.new }
-    end
-
     def collect!
+      inverse_spec_dependencies = Hash.new { |h, k| h[k] = Set.new }
+
       Dir.glob(Spectacle::SPEC_ARTIFACTS_DOWNLOAD_PATH).each do |file|
         data = read_file(file)
 
         data.each do |spec_file, dependencies|
           dependencies.each do |dependency|
-            @inverse_spec_dependencies[dependency].add(spec_file)
+            inverse_spec_dependencies[dependency].add(spec_file)
           end
         end
       end
 
       # Sort the dependencies for each file so that the output is deterministic
-      @inverse_spec_dependencies.each { |k, v| @inverse_spec_dependencies[k] = v.sort.to_a }
+      inverse_spec_dependencies.each { |k, v| inverse_spec_dependencies[k] = v.sort.to_a }
 
-      write_object_to_gzipped_json(@inverse_spec_dependencies, Spectacle::COLLECTED_DEPENDENCIES_FILE)
+      write_object_to_gzipped_json(inverse_spec_dependencies, Spectacle::COLLECTED_DEPENDENCIES_FILE)
 
       nil
     end

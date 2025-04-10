@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spectacle (0.1.5)
+    spectacle (0.2.3)
 
 GEM
   remote: https://rubygems.org/
@@ -26,6 +26,7 @@ GEM
       tzinfo (~> 2.0)
     ast (2.4.2)
     builder (3.3.0)
+    coderay (1.1.3)
     concurrent-ruby (1.3.3)
     crass (1.0.6)
     diff-lcs (1.5.1)
@@ -44,12 +45,13 @@ GEM
     nokogiri (1.16.7)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
-    nokogiri (1.16.7-arm64-darwin)
-      racc (~> 1.4)
     parallel (1.24.0)
     parser (3.3.1.0)
       ast (~> 2.4.1)
       racc
+    pry (0.15.2)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
     racc (1.7.3)
     rack (2.2.9)
     rack-test (2.1.0)
@@ -125,6 +127,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  pry
   railties (= 7.0.8.4)
   rake (~> 13.0)
   rspec (~> 3.0)

@@ -22,10 +22,10 @@ module Spectacle
         $stderr.puts JSON.pretty_generate(object)
       end
 
-      File.open(file_path, "w:ASCII-8BIT") do |f|
-        gz = Zlib::GzipWriter.new(f)
-        gz.write(object.to_json)
-        gz.close
+      File.open(file_path, "wb") do |f|
+        Zlib::GzipWriter.wrap(f) do |gz|
+          gz.write(object.to_json)
+        end
       end
     end
 
@@ -40,7 +40,7 @@ module Spectacle
         {}
       end
     rescue JSON::ParserError
-      $stderr.puts "Failed to parse JSON file: #{file_path}"
+      $stderr.puts "Failed to parse JSON file: '#{file_path}'"
       {}
     end
   end

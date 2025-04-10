@@ -66,7 +66,7 @@ module Spectacle
       files = @spec_files.to_a.sort
 
       if files.empty?
-        $stderr.puts "No spec files to run. Running the pattern defined in the configuration file." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
+        $stderr.puts "No spec files to run. Running the 'on_empty_spec_set' pattern defined in the configuration file." if ENV["WITH_SPECTACLE_DEBUG"] == "true"
         @configuration[:on_empty_spec_set]
       else
         files.join(",")

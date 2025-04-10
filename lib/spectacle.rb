@@ -4,7 +4,6 @@ require_relative "spectacle/version"
 require_relative "spectacle/dependency_tracer"
 require_relative "spectacle/dependency_collector"
 require_relative "spectacle/spec_run_determiner"
-require_relative "spectacle/download_dependencies_json"
 require_relative "spectacle/railtie" if defined?(Rails)
 
 module Spectacle
@@ -38,10 +37,7 @@ if defined?(RSpec) && ENV["WITH_SPECTACLE_TRACING"] == "true"
 
       config.around(:example) do |example|
         dependency_tracer.current_spec_file = example.file_path
-
-        dependency_tracer.with_tracing do
-          example.run
-        end
+        dependency_tracer.with_tracing { example.run }
       end
 
       config.after(:suite) do
