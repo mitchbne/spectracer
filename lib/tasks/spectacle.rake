@@ -26,6 +26,6 @@ namespace :spectacle do
 
   desc "Prints the list of specs that will be run to stdout"
   task :spec_determiner do
-    $stderr.puts "'#{Spectacle::SpecRunDeterminer.determine!}'"
+    $stdout.puts "'#{Spectacle::SpecRunDeterminer.determine!}'"
   end
 end
