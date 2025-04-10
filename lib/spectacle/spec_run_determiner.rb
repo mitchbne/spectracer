@@ -45,8 +45,8 @@ module Spectacle
 
         file_key = "./#{file}"
         if ENV["WITH_SPECTACLE_DEBUG"] == "true"
-          puts "Checking dependencies for '#{file_key}'..."
-          puts "dependencies.json keys: #{@dependencies.keys}"
+          $stderr.puts "Checking dependencies for '#{file_key}'..."
+          $stderr.puts "dependencies.json keys: #{@dependencies.keys}"
         end
 
         if spec_files = @dependencies[file_key]
@@ -72,7 +72,7 @@ module Spectacle
         files.join(",")
       end
     rescue => e
-      puts e.backtrace
+      $stderr.puts e.backtrace
     end
 
     private

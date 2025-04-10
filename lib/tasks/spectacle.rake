@@ -4,11 +4,11 @@ namespace :spectacle do
   desc "Install Spectacle"
   task :install do
     if File.exist?(configuration_file_path)
-      puts "Spectacle is already installed."
+      $stderr.puts "Spectacle is already installed."
       exit 0;
     end
 
-    puts "Creating '#{configuration_file_path}' file."
+    $stderr.puts "Creating '#{configuration_file_path}' file."
     # Prompt the user for the globs that they want to use to determine which spec files to run
     # and write them to the configuration file.
     default_file_path = File.join(Pathname.new(__dir__).join("..", "spectacle.default.yml"))
@@ -26,6 +26,6 @@ namespace :spectacle do
 
   desc "Prints the list of specs that will be run to stdout"
   task :spec_determiner do
-    puts "'#{Spectacle::SpecRunDeterminer.determine!}'"
+    $stderr.puts "'#{Spectacle::SpecRunDeterminer.determine!}'"
   end
 end
