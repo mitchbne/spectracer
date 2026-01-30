@@ -40,11 +40,12 @@ module Spectacle
       private
 
       def tracepoint
-        @tracepoint ||= TracePoint.new(:line) do |tp|
-          next unless tp.path.start_with?(repository_root)
+        @tracepoint ||= TracePoint.new(:call) do |tp|
+          path = tp.path
+          next unless path.start_with?(repository_root)
           next if @current_spec_file.nil?
 
-          file_path = normalize_path(tp.path)
+          file_path = normalize_path(path)
           next if @current_spec_file == file_path
 
           @spec_file_dependencies[@current_spec_file].add(file_path)
