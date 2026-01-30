@@ -1,4 +1,195 @@
 module Spectacle
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  class Error < StandardError
+  end
+
+  def self.logger: () -> Logger
+  def self.paths: () -> Core::Paths
+
+  class Logger
+    LEVELS: Hash[Symbol, Integer]
+
+    def initialize: (?output: IO, ?level: Symbol, ?enabled: bool) -> void
+    def debug: (String message) -> void
+    def info: (String message) -> void
+    def warn: (String message) -> void
+    def error: (String message) -> void
+
+    private
+
+    def log: (Symbol level, String message) -> void
+  end
+
+  module Core
+    class Paths
+      DEFAULT_OUTPUT_DIR: String
+
+      def initialize: (?env: Hash[String, String?]) -> void
+      def build_id: () -> String
+      def job_id: () -> String
+      def output_directory: () -> String
+      def spec_artifact_output_file: () -> String
+      def spec_artifacts_download_glob: () -> String
+      def collected_dependencies_file: () -> String
+      def normalize: (String file_path, repo_root: String) -> String
+      def strip_dot_prefix: (String path) -> String
+    end
+
+    class SpecSelector
+      def call: (
+        changed_files: Array[String],
+        inverse_deps: Hash[String, Array[String]],
+        globs: Hash[String, String],
+        on_empty: String
+      ) -> String
+    end
+  end
+
+  module IO
+    class CommandRunner
+      def initialize: (?logger: Logger?) -> void
+      def run: (String command) -> String
+    end
+
+    class DependencyStore
+      def initialize: (?logger: Logger?) -> void
+      def read: (String file_path) -> Hash[String, untyped]
+      def write: (Hash[String, untyped] data, String file_path) -> void
+      def glob: (String pattern) -> Array[String]
+
+      private
+
+      def read_gzipped_json: (String file_path) -> Hash[String, untyped]
+      def read_json: (String file_path) -> Hash[String, untyped]
+    end
+
+    class ConfigLoader
+      FILE_PATH: String
+      DEFAULT_FILE_PATH: String
+
+      def initialize: (?logger: Logger?) -> void
+      def load: () -> Hash[Symbol, untyped]
+
+      private
+
+      def load_raw_config: () -> Hash[String, untyped]?
+      def parse_config: (Hash[String, untyped] raw) -> Hash[Symbol, untyped]
+      def resolve_templates: (String template, Hash[String, String] defaults) -> String
+      def default_config: () -> Hash[Symbol, untyped]
+    end
+
+    class GitAdapter
+      def initialize: (?working_dir: String, ?logger: Logger?) -> void
+      def repository_root: () -> String
+      def current_branch: () -> String
+      def commit_sha: (String ref) -> String
+      def changed_files_in_commit: (String sha) -> Array[String]
+      def changed_files_against: (String target_branch, ?cached: bool) -> Array[String]
+
+      private
+
+      def git: () -> untyped
+    end
+  end
+
+  module Providers
+    class Repository
+      def initialize: (?git_adapter: IO::GitAdapter) -> void
+      def root: () -> String
+    end
+
+    class GitChangedFiles
+      def initialize: (
+        ?git_adapter: IO::GitAdapter,
+        ?env: Hash[String, String?],
+        ?logger: Logger?
+      ) -> void
+      def call: () -> Array[String]
+
+      private
+
+      def changed_files_for_latest_commit: (String branch) -> Array[String]
+      def changed_files_against_default_branch: (String default_branch) -> Array[String]
+    end
+  end
+
+  module Orchestrators
+    class DependencyTracer
+      attr_writer current_spec_file: String?
+
+      def initialize: (
+        ?paths: Core::Paths,
+        ?store: IO::DependencyStore,
+        ?repository: Providers::Repository,
+        ?logger: Logger?
+      ) -> void
+      def with_tracing: () { () -> void } -> void
+      def write_output!: () -> void
+
+      private
+
+      def tracepoint: () -> TracePoint
+      def repository_root: () -> String
+      def normalize_path: (String path) -> String
+      def build_output: () -> Hash[String, Array[String]]
+    end
+
+    class DependencyCollector
+      def initialize: (
+        ?paths: Core::Paths,
+        ?store: IO::DependencyStore,
+        ?logger: Logger?
+      ) -> void
+      def self.collect!: (**untyped) -> nil
+      def collect!: () -> nil
+
+      private
+
+      def build_inverse_dependencies: () -> Hash[String, Array[String]]
+      def artifact_files: () -> Array[String]
+    end
+
+    class SpecRunDeterminer
+      def initialize: (
+        ?paths: Core::Paths,
+        ?store: IO::DependencyStore,
+        ?config_loader: IO::ConfigLoader,
+        ?changed_files_provider: Providers::GitChangedFiles,
+        ?selector: Core::SpecSelector,
+        ?logger: Logger?
+      ) -> void
+      def self.determine!: (**untyped) -> String?
+      def determine!: () -> String?
+
+      private
+
+      def load_dependencies: () -> Hash[String, Array[String]]
+      def log_debug_info: (Hash[Symbol, untyped] config, Array[String] changed_files) -> void
+    end
+  end
+
+  module Integrations
+    module RSpec
+      def self.install!: () -> void
+    end
+
+    module Minitest
+      attr_accessor self.tracer: Orchestrators::DependencyTracer?
+
+      def self.install!: () -> void
+
+      module RunPatch
+        def run: (?Array[String] args) -> untyped
+      end
+
+      module TestCasePlugin
+        def before_setup: () -> void
+        def run: () -> untyped
+      end
+    end
+
+    class Railtie < Rails::Railtie
+    end
+  end
 end

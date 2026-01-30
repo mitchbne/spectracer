@@ -1,0 +1,143 @@
+# Spectacle CI Pipeline
+# Meta: Uses Spectacle to test Spectacle! 🔮
+
+env:
+  RUBY_VERSION: "3.3"
+  SPECTACLE_TMP_DIRECTORY: "tmp/spectacle"
+
+steps:
+  # ============================================================================
+  # Main Branch: Full suite with tracing
+  # ============================================================================
+  - group: ":crystal_ball: Full Suite with Tracing"
+    key: "full-suite"
+    if: build.branch == "main"
+    steps:
+      - label: ":rspec: RSpec with Tracing"
+        key: "rspec-traced"
+        command: |
+          bundle install --jobs 4
+          WITH_SPECTACLE_TRACING=true bundle exec rspec --format progress --format json --out tmp/rspec-results.json
+        artifact_paths:
+          - "tmp/spectacle/**/*"
+          - "tmp/rspec-results.json"
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
+              mount-buildkite-agent: true
+
+      - label: ":standardrb: Lint"
+        key: "lint"
+        command: |
+          bundle install --jobs 4
+          bundle exec standardrb
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+
+      - label: ":package: Collect Dependencies"
+        key: "collect-deps"
+        depends_on: "rspec-traced"
+        command: |
+          bundle install --jobs 4
+          buildkite-agent artifact download "tmp/spectacle/**/*" .
+          bundle exec rake spectacle:collect_dependencies
+          echo "--- Dependency map created"
+          ls -la tmp/spectacle/
+        artifact_paths:
+          - "tmp/spectacle/dependencies.json.gz"
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
+              mount-buildkite-agent: true
+
+  # ============================================================================
+  # Feature Branches: Run only affected specs (using Spectacle!)
+  # ============================================================================
+  - group: ":zap: Affected Specs Only"
+    key: "affected-specs"
+    if: build.branch != "main"
+    steps:
+      - label: ":mag: Determine Specs to Run"
+        key: "determine-specs"
+        command: |
+          bundle install --jobs 4
+          
+          echo "--- Downloading dependency map from main branch"
+          # Try to download latest dependencies from main
+          buildkite-agent artifact download "tmp/spectacle/dependencies.json.gz" . \
+            --build "latest" \
+            --branch main || echo "No dependency map found, will run fallback"
+          
+          echo "--- Determining specs to run"
+          if [ -f "tmp/spectacle/dependencies.json.gz" ]; then
+            SPECS=$$(WITH_SPECTACLE_DEBUG=true bundle exec rake spectacle:spec_determiner 2>&1 | tee /dev/stderr | tail -1 | tr -d "'")
+            echo "Specs to run: $$SPECS"
+            
+            if [ -z "$$SPECS" ] || [ "$$SPECS" = "" ]; then
+              echo "No specs affected, running smoke tests"
+              SPECS="spec/spectacle_spec.rb"
+            fi
+          else
+            echo "No dependency map, running full suite"
+            SPECS="spec"
+          fi
+          
+          # Save specs to metadata for next step
+          buildkite-agent meta-data set "specs-to-run" "$$SPECS"
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
+              mount-buildkite-agent: true
+
+      - label: ":rspec: Run Affected Specs"
+        key: "run-affected"
+        depends_on: "determine-specs"
+        command: |
+          bundle install --jobs 4
+          
+          SPECS=$$(buildkite-agent meta-data get "specs-to-run")
+          echo "--- Running: $$SPECS"
+          
+          if [ "$$SPECS" = "spec" ]; then
+            bundle exec rspec --format progress
+          else
+            # Handle comma-separated spec list
+            SPEC_ARGS=$$(echo "$$SPECS" | tr ',' ' ')
+            bundle exec rspec $$SPEC_ARGS --format progress
+          fi
+        artifact_paths:
+          - "tmp/rspec-*.json"
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
+              mount-buildkite-agent: true
+
+      - label: ":standardrb: Lint"
+        key: "lint-branch"
+        command: |
+          bundle install --jobs 4
+          bundle exec standardrb
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+
+  # ============================================================================
+  # All Branches: Build verification
+  # ============================================================================
+  - label: ":gem: Build Gem"
+    key: "build-gem"
+    command: |
+      bundle install --jobs 4
+      bundle exec rake build
+      echo "--- Gem built successfully"
+      ls -la pkg/
+    artifact_paths:
+      - "pkg/*.gem"
+    plugins:
+      - docker#v5.11.0:
+          image: "ruby:${RUBY_VERSION}"
