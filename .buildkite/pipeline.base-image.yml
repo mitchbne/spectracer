@@ -1,4 +1,4 @@
 ---
 steps:
 - label: ":docker: Create base image"
-  command: "./steps/generate-docker-image.sh"
+  command: ".buildkite/steps/generate-docker-image.sh"
