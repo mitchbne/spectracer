@@ -7,4 +7,8 @@ RSpec::Core::RakeTask.new(:spec)
 
 require "standard/rake"
 
+# Load spectracer rake tasks
+require_relative "lib/spectracer"
+load "lib/spectracer/tasks/spectracer.rake"
+
 task default: %i[spec standard]
