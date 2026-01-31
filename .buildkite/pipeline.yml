@@ -11,9 +11,19 @@ env:
 
 steps:
   # ============================================================================
+  # Setup: Install dependencies (runs first, all other steps depend on it)
+  # ============================================================================
+  - label: ":ruby: Install Gems"
+    key: "install-gems"
+    command: |
+      bundle install --jobs 4
+    plugins: [*buildkite-cache]
+
+  # ============================================================================
   # Main Branch: Full suite with tracing
   # ============================================================================
   - group: ":crystal_ball: Full Suite with Tracing"
+    depends_on: "install-gems"
     key: "full-suite"
     if: build.branch == "main"
     steps:
@@ -56,6 +66,7 @@ steps:
   # Feature Branches: Run only affected specs (using Spectracer!)
   # ============================================================================
   - group: ":zap: Affected Specs Only"
+    depends_on: "install-gems"
     key: "affected-specs"
     if: build.branch != "main"
     steps:
@@ -125,6 +136,7 @@ steps:
   # ============================================================================
   - label: ":rubocop: Lint"
     key: "lint"
+    depends_on: "install-gems"
     command: |
       bundle install --jobs 4
       bundle exec standardrb
@@ -132,6 +144,7 @@ steps:
 
   - label: ":gem: Build Gem"
     key: "build-gem"
+    depends_on: "install-gems"
     command: |
       bundle install --jobs 4
       bundle exec rake build
