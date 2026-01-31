@@ -2,7 +2,7 @@
 
 require "git"
 
-module Spectacle
+module Spectracer
   module IO
     class GitAdapter
       def initialize(working_dir: Dir.pwd, logger: nil)

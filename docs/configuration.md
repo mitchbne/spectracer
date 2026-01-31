@@ -2,12 +2,12 @@
 
 ## Configuration File
 
-Spectacle uses a `.spectacle.yml` file in your project root for configuration.
+Spectracer uses a `.spectracer.yml` file in your project root for configuration.
 
 ### Generating Default Configuration
 
 ```bash
-bundle exec rake spectacle:install
+bundle exec rake spectracer:install
 ```
 
 ### Configuration Structure
@@ -183,12 +183,12 @@ Configuration can be influenced by environment variables:
 
 | Variable | Purpose |
 |----------|---------|
-| `SPECTACLE_TMP_DIRECTORY` | Override the output directory (default: `tmp/spectacle`) |
-| `WITH_SPECTACLE_DEBUG` | Enable debug logging when set to `"true"` |
+| `SPECTRACER_TMP_DIRECTORY` | Override the output directory (default: `tmp/spectracer`) |
+| `WITH_SPECTRACER_DEBUG` | Enable debug logging when set to `"true"` |
 
 ## Fallback Behavior
 
-If no `.spectacle.yml` file exists, Spectacle uses a minimal default configuration:
+If no `.spectracer.yml` file exists, Spectracer uses a minimal default configuration:
 
 ```yaml
 defaults:

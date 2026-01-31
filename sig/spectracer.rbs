@@ -1,4 +1,4 @@
-module Spectacle
+module Spectracer
   VERSION: String
 
   class Error < StandardError

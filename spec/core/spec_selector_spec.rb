@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Core::SpecSelector do
+RSpec.describe Spectracer::Core::SpecSelector do
   subject(:selector) { described_class.new }
 
   describe "#call" do

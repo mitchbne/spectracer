@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::IO::GitAdapter do
+RSpec.describe Spectracer::IO::GitAdapter do
   subject(:adapter) { described_class.new(working_dir: Dir.pwd) }
 
   describe "#repository_root" do
@@ -42,7 +42,7 @@ RSpec.describe Spectacle::IO::GitAdapter do
 
     context "when target branch does not exist" do
       it "returns empty array and logs warning" do
-        logger = instance_double(Spectacle::Logger)
+        logger = instance_double(Spectracer::Logger)
         adapter_with_logger = described_class.new(working_dir: Dir.pwd, logger: logger)
 
         allow(logger).to receive(:warn)

@@ -2,7 +2,7 @@
 
 require "open3"
 
-module Spectacle
+module Spectracer
   module IO
     class CommandRunner
       def initialize(logger: nil)

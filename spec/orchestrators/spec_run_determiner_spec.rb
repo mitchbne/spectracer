@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Orchestrators::SpecRunDeterminer do
+RSpec.describe Spectracer::Orchestrators::SpecRunDeterminer do
   subject(:determiner) do
     described_class.new(
       paths: paths,
@@ -11,11 +11,11 @@ RSpec.describe Spectacle::Orchestrators::SpecRunDeterminer do
     )
   end
 
-  let(:paths) { instance_double(Spectacle::Core::Paths, collected_dependencies_file: "/tmp/deps.json.gz") }
-  let(:store) { instance_double(Spectacle::IO::DependencyStore) }
-  let(:config_loader) { instance_double(Spectacle::IO::ConfigLoader) }
-  let(:changed_files_provider) { instance_double(Spectacle::Providers::GitChangedFiles) }
-  let(:selector) { instance_double(Spectacle::Core::SpecSelector) }
+  let(:paths) { instance_double(Spectracer::Core::Paths, collected_dependencies_file: "/tmp/deps.json.gz") }
+  let(:store) { instance_double(Spectracer::IO::DependencyStore) }
+  let(:config_loader) { instance_double(Spectracer::IO::ConfigLoader) }
+  let(:changed_files_provider) { instance_double(Spectracer::Providers::GitChangedFiles) }
+  let(:selector) { instance_double(Spectracer::Core::SpecSelector) }
 
   let(:dependencies) { {"./app/models/user.rb" => ["spec/models/user_spec.rb"]} }
   let(:config) { {globs: {}, on_empty_spec_set: "spec/smoke_spec.rb"} }

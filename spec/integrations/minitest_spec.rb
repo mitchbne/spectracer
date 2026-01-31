@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Integrations::Minitest do
+RSpec.describe Spectracer::Integrations::Minitest do
   describe ".install!" do
     before do
       described_class.tracer = nil
@@ -17,11 +17,11 @@ RSpec.describe Spectacle::Integrations::Minitest do
       end
     end
 
-    context "when WITH_SPECTACLE_TRACING is not set" do
+    context "when WITH_SPECTRACER_TRACING is not set" do
       before do
         stub_const("Minitest", Class.new)
         allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with("WITH_SPECTACLE_TRACING").and_return(nil)
+        allow(ENV).to receive(:[]).with("WITH_SPECTRACER_TRACING").and_return(nil)
       end
 
       it "does not install" do
@@ -36,19 +36,19 @@ RSpec.describe Spectacle::Integrations::Minitest do
       before do
         stub_const("Minitest", minitest_mock)
         allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with("WITH_SPECTACLE_TRACING").and_return("true")
-        allow(ENV).to receive(:[]).with("WITH_SPECTACLE_DEBUG").and_return("false")
+        allow(ENV).to receive(:[]).with("WITH_SPECTRACER_TRACING").and_return("true")
+        allow(ENV).to receive(:[]).with("WITH_SPECTRACER_DEBUG").and_return("false")
       end
 
       it "creates a tracer" do
         described_class.install!
-        expect(described_class.tracer).to be_a(Spectacle::Orchestrators::DependencyTracer)
+        expect(described_class.tracer).to be_a(Spectracer::Orchestrators::DependencyTracer)
       end
     end
   end
 
-  describe Spectacle::Integrations::Minitest::TestCasePlugin do
-    let(:tracer) { instance_double(Spectacle::Orchestrators::DependencyTracer) }
+  describe Spectracer::Integrations::Minitest::TestCasePlugin do
+    let(:tracer) { instance_double(Spectracer::Orchestrators::DependencyTracer) }
 
     let(:base_class) do
       Class.new do
@@ -73,16 +73,16 @@ RSpec.describe Spectacle::Integrations::Minitest do
 
     let(:test_class) do
       klass = Class.new(base_class)
-      klass.prepend(Spectacle::Integrations::Minitest::TestCasePlugin)
+      klass.prepend(Spectracer::Integrations::Minitest::TestCasePlugin)
       klass
     end
 
     before do
-      Spectacle::Integrations::Minitest.tracer = tracer
+      Spectracer::Integrations::Minitest.tracer = tracer
     end
 
     after do
-      Spectacle::Integrations::Minitest.tracer = nil
+      Spectracer::Integrations::Minitest.tracer = nil
     end
 
     describe "#run" do

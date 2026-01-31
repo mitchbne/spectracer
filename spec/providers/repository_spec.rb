@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Providers::Repository do
+RSpec.describe Spectracer::Providers::Repository do
   subject(:repository) { described_class.new(git_adapter: git_adapter) }
 
-  let(:git_adapter) { instance_double(Spectacle::IO::GitAdapter) }
+  let(:git_adapter) { instance_double(Spectracer::IO::GitAdapter) }
 
   describe "#root" do
     before do

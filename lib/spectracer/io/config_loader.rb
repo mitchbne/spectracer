@@ -2,11 +2,11 @@
 
 require "yaml"
 
-module Spectacle
+module Spectracer
   module IO
     class ConfigLoader
-      FILE_PATH = ".spectacle.yml"
-      DEFAULT_FILE_PATH = File.expand_path("../../spectacle.default.yml", __dir__)
+      FILE_PATH = ".spectracer.yml"
+      DEFAULT_FILE_PATH = File.expand_path("../../spectracer.default.yml", __dir__)
 
       def initialize(logger: nil)
         @logger = logger

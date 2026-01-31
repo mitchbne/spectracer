@@ -2,11 +2,11 @@
 
 require "rails/railtie"
 
-module Spectacle
+module Spectracer
   module Integrations
     class Railtie < Rails::Railtie
       rake_tasks do
-        load "spectacle/tasks/spectacle.rake"
+        load "spectracer/tasks/spectracer.rake"
       end
     end
   end

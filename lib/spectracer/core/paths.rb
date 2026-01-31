@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Core
     class Paths
-      DEFAULT_OUTPUT_DIR = "tmp/spectacle"
+      DEFAULT_OUTPUT_DIR = "tmp/spectracer"
 
       def initialize(env: ENV)
         @env = env
@@ -18,7 +18,7 @@ module Spectacle
       end
 
       def output_directory
-        @env["SPECTACLE_TMP_DIRECTORY"] || DEFAULT_OUTPUT_DIR
+        @env["SPECTRACER_TMP_DIRECTORY"] || DEFAULT_OUTPUT_DIR
       end
 
       def spec_artifact_output_file

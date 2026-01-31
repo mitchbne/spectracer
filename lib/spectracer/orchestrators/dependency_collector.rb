@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Orchestrators
     class DependencyCollector
       def initialize(
-        paths: Spectacle::Core::Paths.new,
-        store: Spectacle::IO::DependencyStore.new,
+        paths: Spectracer::Core::Paths.new,
+        store: Spectracer::IO::DependencyStore.new,
         logger: nil
       )
         @paths = paths

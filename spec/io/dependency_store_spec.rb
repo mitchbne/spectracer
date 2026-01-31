@@ -3,7 +3,7 @@
 require "tempfile"
 require "zlib"
 
-RSpec.describe Spectacle::IO::DependencyStore do
+RSpec.describe Spectracer::IO::DependencyStore do
   subject(:store) { described_class.new }
 
   describe "#read" do

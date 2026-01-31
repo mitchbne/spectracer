@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Providers
     class GitChangedFiles
-      def initialize(git_adapter: Spectacle::IO::GitAdapter.new, env: ENV, logger: nil)
+      def initialize(git_adapter: Spectracer::IO::GitAdapter.new, env: ENV, logger: nil)
         @git_adapter = git_adapter
         @env = env
         @logger = logger

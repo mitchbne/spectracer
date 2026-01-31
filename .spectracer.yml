@@ -1,4 +1,4 @@
-# Spectacle configuration for Spectacle itself 🔮
+# Spectracer configuration for Spectracer itself 🔮
 # Meta: The tool tests itself!
 
 defaults:
@@ -10,38 +10,38 @@ defaults:
   integration_specs: "spec/integrations/**/*_spec.rb"
 
 # When no specs are affected, run the main module spec as a smoke test
-on_empty_spec_set: "spec/spectacle_spec.rb"
+on_empty_spec_set: "spec/spectracer_spec.rb"
 
 globs_matcher:
   # Dependency changes - run everything
   "Gemfile": "{{all_specs}}"
   "Gemfile.lock": "{{all_specs}}"
-  "spectacle.gemspec": "{{all_specs}}"
+  "spectracer.gemspec": "{{all_specs}}"
 
   # Core logic changes
-  "lib/spectacle/core/**/*": "{{core_specs}},{{orchestrator_specs}}"
+  "lib/spectracer/core/**/*": "{{core_specs}},{{orchestrator_specs}}"
   
   # I/O adapter changes
-  "lib/spectacle/io/**/*": "{{io_specs}},{{provider_specs}},{{orchestrator_specs}}"
+  "lib/spectracer/io/**/*": "{{io_specs}},{{provider_specs}},{{orchestrator_specs}}"
   
   # Provider changes
-  "lib/spectacle/providers/**/*": "{{provider_specs}},{{orchestrator_specs}}"
+  "lib/spectracer/providers/**/*": "{{provider_specs}},{{orchestrator_specs}}"
   
   # Orchestrator changes
-  "lib/spectacle/orchestrators/**/*": "{{orchestrator_specs}}"
+  "lib/spectracer/orchestrators/**/*": "{{orchestrator_specs}}"
   
   # Integration changes
-  "lib/spectacle/integrations/**/*": "{{integration_specs}}"
+  "lib/spectracer/integrations/**/*": "{{integration_specs}}"
   
   # Main entry point
-  "lib/spectacle.rb": "spec/spectacle_spec.rb"
+  "lib/spectracer.rb": "spec/spectracer_spec.rb"
   
   # Logger
-  "lib/spectacle/logger.rb": "spec/logger_spec.rb"
+  "lib/spectracer/logger.rb": "spec/logger_spec.rb"
   
   # Configuration
-  "lib/spectacle.default.yml": "spec/io/config_loader_spec.rb"
-  ".spectacle.yml": "spec/io/config_loader_spec.rb"
+  "lib/spectracer.default.yml": "spec/io/config_loader_spec.rb"
+  ".spectracer.yml": "spec/io/config_loader_spec.rb"
   
   # CI changes - run everything to verify pipeline
   ".buildkite/**/*": "{{all_specs}}"

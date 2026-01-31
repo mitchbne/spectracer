@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Providers::GitChangedFiles do
+RSpec.describe Spectracer::Providers::GitChangedFiles do
   subject(:provider) { described_class.new(git_adapter: git_adapter, env: env) }
 
-  let(:git_adapter) { instance_double(Spectacle::IO::GitAdapter) }
+  let(:git_adapter) { instance_double(Spectracer::IO::GitAdapter) }
   let(:env) { {} }
 
   describe "#call" do

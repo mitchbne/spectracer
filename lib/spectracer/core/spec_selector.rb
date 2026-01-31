@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Core
     class SpecSelector
       def call(changed_files:, inverse_deps:, globs:, on_empty:)

@@ -1,8 +1,8 @@
-# Spectacle Architecture
+# Spectracer Architecture
 
 ## Overview
 
-Spectacle follows a clean architecture pattern with clear separation between:
+Spectracer follows a clean architecture pattern with clear separation between:
 
 - **Core** - Pure business logic with no I/O
 - **I/O** - Adapters for external systems (filesystem, git, config)
@@ -13,7 +13,7 @@ Spectacle follows a clean architecture pattern with clear separation between:
 ## Directory Structure
 
 ```
-lib/spectacle/
+lib/spectracer/
 ├── core/                    # Pure business logic
 │   ├── paths.rb             # Path computation
 │   └── spec_selector.rb     # Spec selection algorithm
@@ -34,7 +34,7 @@ lib/spectacle/
 │   ├── railtie.rb
 │   └── rspec.rb
 ├── tasks/
-│   └── spectacle.rake
+│   └── spectracer.rake
 ├── logger.rb
 └── version.rb
 ```
@@ -81,9 +81,9 @@ lib/spectacle/
 Computes file paths based on environment variables. No I/O operations.
 
 ```ruby
-paths = Spectacle::Core::Paths.new(env: ENV)
-paths.spec_artifact_output_file  # => "tmp/spectacle/tracing_output/build123/job456.json.gz"
-paths.collected_dependencies_file # => "tmp/spectacle/dependencies.json.gz"
+paths = Spectracer::Core::Paths.new(env: ENV)
+paths.spec_artifact_output_file  # => "tmp/spectracer/tracing_output/build123/job456.json.gz"
+paths.collected_dependencies_file # => "tmp/spectracer/dependencies.json.gz"
 ```
 
 ### SpecSelector (`core/spec_selector.rb`)
@@ -91,7 +91,7 @@ paths.collected_dependencies_file # => "tmp/spectacle/dependencies.json.gz"
 Pure function that determines which specs to run. Takes data in, returns spec patterns out.
 
 ```ruby
-selector = Spectacle::Core::SpecSelector.new
+selector = Spectracer::Core::SpecSelector.new
 result = selector.call(
   changed_files: ["app/models/user.rb"],
   inverse_deps: {"./app/models/user.rb" => ["spec/models/user_spec.rb"]},
@@ -108,7 +108,7 @@ result = selector.call(
 Wraps the `ruby-git` gem for all git operations:
 
 ```ruby
-adapter = Spectacle::IO::GitAdapter.new
+adapter = Spectracer::IO::GitAdapter.new
 adapter.repository_root        # => "/home/user/project"
 adapter.current_branch         # => "feature/new-thing"
 adapter.commit_sha("HEAD")     # => "abc123..."
@@ -121,17 +121,17 @@ adapter.changed_files_against("main", cached: true)
 Handles reading/writing gzipped JSON files:
 
 ```ruby
-store = Spectacle::IO::DependencyStore.new
+store = Spectracer::IO::DependencyStore.new
 store.write({"spec/user_spec.rb" => ["app/models/user.rb"]}, "deps.json.gz")
 data = store.read("deps.json.gz")
 ```
 
 ### ConfigLoader (`io/config_loader.rb`)
 
-Loads and parses `.spectacle.yml` configuration:
+Loads and parses `.spectracer.yml` configuration:
 
 ```ruby
-loader = Spectacle::IO::ConfigLoader.new
+loader = Spectracer::IO::ConfigLoader.new
 config = loader.load
 # => {on_empty_spec_set: "spec/**/*_spec.rb", globs: {...}}
 ```
@@ -143,10 +143,10 @@ config = loader.load
 Wraps test execution with TracePoint to record file dependencies:
 
 ```ruby
-tracer = Spectacle::Orchestrators::DependencyTracer.new
+tracer = Spectracer::Orchestrators::DependencyTracer.new
 tracer.current_spec_file = "spec/models/user_spec.rb"
 tracer.with_tracing { run_test }
-tracer.write_output!  # Writes to tmp/spectacle/tracing_output/...
+tracer.write_output!  # Writes to tmp/spectracer/tracing_output/...
 ```
 
 ### DependencyCollector
@@ -154,9 +154,9 @@ tracer.write_output!  # Writes to tmp/spectacle/tracing_output/...
 Combines individual trace files into inverse dependency map:
 
 ```ruby
-Spectacle::Orchestrators::DependencyCollector.collect!
-# Reads: tmp/spectacle/tracing_output/build123/*.json.gz
-# Writes: tmp/spectacle/dependencies.json.gz
+Spectracer::Orchestrators::DependencyCollector.collect!
+# Reads: tmp/spectracer/tracing_output/build123/*.json.gz
+# Writes: tmp/spectracer/dependencies.json.gz
 ```
 
 ### SpecRunDeterminer
@@ -164,7 +164,7 @@ Spectacle::Orchestrators::DependencyCollector.collect!
 Coordinates all components to determine specs to run:
 
 ```ruby
-result = Spectacle::Orchestrators::SpecRunDeterminer.determine!
+result = Spectracer::Orchestrators::SpecRunDeterminer.determine!
 # => "spec/models/user_spec.rb,spec/controllers/users_controller_spec.rb"
 ```
 
@@ -186,13 +186,13 @@ RSpec/Minitest Test Run
 └──────────┬──────────┘
            │
            ▼
-   tmp/spectacle/tracing_output/{build_id}/{job_id}.json.gz
+   tmp/spectracer/tracing_output/{build_id}/{job_id}.json.gz
 ```
 
 ### Collection Phase
 
 ```
-   tmp/spectacle/tracing_output/{build_id}/*.json.gz
+   tmp/spectracer/tracing_output/{build_id}/*.json.gz
            │
            ▼
 ┌─────────────────────┐
@@ -205,13 +205,13 @@ RSpec/Minitest Test Run
 └──────────┬──────────┘
            │
            ▼
-   tmp/spectacle/dependencies.json.gz
+   tmp/spectracer/dependencies.json.gz
 ```
 
 ### Selection Phase
 
 ```
-   tmp/spectacle/dependencies.json.gz
+   tmp/spectracer/dependencies.json.gz
            │
            ▼
 ┌─────────────────────┐      ┌─────────────────────┐
@@ -241,11 +241,11 @@ All classes accept their dependencies via constructor arguments with sensible de
 ```ruby
 class SpecRunDeterminer
   def initialize(
-    paths: Spectacle::Core::Paths.new,
-    store: Spectacle::IO::DependencyStore.new,
-    config_loader: Spectacle::IO::ConfigLoader.new,
-    changed_files_provider: Spectacle::Providers::GitChangedFiles.new,
-    selector: Spectacle::Core::SpecSelector.new,
+    paths: Spectracer::Core::Paths.new,
+    store: Spectracer::IO::DependencyStore.new,
+    config_loader: Spectracer::IO::ConfigLoader.new,
+    changed_files_provider: Spectracer::Providers::GitChangedFiles.new,
+    selector: Spectracer::Core::SpecSelector.new,
     logger: nil
   )
     # ...

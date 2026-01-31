@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::IO::ConfigLoader do
+RSpec.describe Spectracer::IO::ConfigLoader do
   subject(:loader) { described_class.new }
 
   describe "#load" do
     context "when no config file exists" do
       before do
-        allow(File).to receive(:exist?).with(".spectacle.yml").and_return(false)
+        allow(File).to receive(:exist?).with(".spectracer.yml").and_return(false)
       end
 
       it "loads default configuration" do
@@ -27,8 +27,8 @@ RSpec.describe Spectacle::IO::ConfigLoader do
       end
 
       before do
-        allow(File).to receive(:exist?).with(".spectacle.yml").and_return(true)
-        allow(YAML).to receive(:safe_load_file).with(".spectacle.yml").and_return(config_content)
+        allow(File).to receive(:exist?).with(".spectracer.yml").and_return(true)
+        allow(YAML).to receive(:safe_load_file).with(".spectracer.yml").and_return(config_content)
       end
 
       it "resolves templates in on_empty_spec_set" do

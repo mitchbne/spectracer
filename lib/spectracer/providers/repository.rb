@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Providers
     class Repository
-      def initialize(git_adapter: Spectacle::IO::GitAdapter.new)
+      def initialize(git_adapter: Spectracer::IO::GitAdapter.new)
         @git_adapter = git_adapter
       end
 

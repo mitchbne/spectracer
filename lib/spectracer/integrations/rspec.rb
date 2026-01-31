@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Integrations
     module RSpec
       def self.install!
         return unless defined?(::RSpec) && ::RSpec.respond_to?(:configure)
-        return unless ENV["WITH_SPECTACLE_TRACING"] == "true"
+        return unless ENV["WITH_SPECTRACER_TRACING"] == "true"
 
-        logger = Spectacle::Logger.new(
-          enabled: ENV["WITH_SPECTACLE_DEBUG"] == "true",
+        logger = Spectracer::Logger.new(
+          enabled: ENV["WITH_SPECTRACER_DEBUG"] == "true",
           level: :debug
         )
 
-        tracer = Spectacle::Orchestrators::DependencyTracer.new(logger: logger)
+        tracer = Spectracer::Orchestrators::DependencyTracer.new(logger: logger)
 
         ::RSpec.configure do |config|
           config.around(:example) do |example|

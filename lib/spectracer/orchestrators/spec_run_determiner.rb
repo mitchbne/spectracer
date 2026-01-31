@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Orchestrators
     class SpecRunDeterminer
       def initialize(
-        paths: Spectacle::Core::Paths.new,
-        store: Spectacle::IO::DependencyStore.new,
-        config_loader: Spectacle::IO::ConfigLoader.new,
-        changed_files_provider: Spectacle::Providers::GitChangedFiles.new,
-        selector: Spectacle::Core::SpecSelector.new,
+        paths: Spectracer::Core::Paths.new,
+        store: Spectracer::IO::DependencyStore.new,
+        config_loader: Spectracer::IO::ConfigLoader.new,
+        changed_files_provider: Spectracer::Providers::GitChangedFiles.new,
+        selector: Spectracer::Core::SpecSelector.new,
         logger: nil
       )
         @paths = paths

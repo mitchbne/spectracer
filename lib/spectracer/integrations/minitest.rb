@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   module Integrations
     module Minitest
       class << self
@@ -8,14 +8,14 @@ module Spectacle
 
         def install!
           return unless defined?(::Minitest)
-          return unless ENV["WITH_SPECTACLE_TRACING"] == "true"
+          return unless ENV["WITH_SPECTRACER_TRACING"] == "true"
 
-          logger = Spectacle::Logger.new(
-            enabled: ENV["WITH_SPECTACLE_DEBUG"] == "true",
+          logger = Spectracer::Logger.new(
+            enabled: ENV["WITH_SPECTRACER_DEBUG"] == "true",
             level: :debug
           )
 
-          self.tracer = Spectacle::Orchestrators::DependencyTracer.new(logger: logger)
+          self.tracer = Spectracer::Orchestrators::DependencyTracer.new(logger: logger)
 
           ::Minitest.singleton_class.prepend(RunPatch)
         end
@@ -24,7 +24,7 @@ module Spectacle
       module RunPatch
         def run(args = [])
           result = super
-          Spectacle::Integrations::Minitest.tracer&.write_output!
+          Spectracer::Integrations::Minitest.tracer&.write_output!
           result
         end
       end
@@ -32,7 +32,7 @@ module Spectacle
       module TestCasePlugin
         def before_setup
           super
-          tracer = Spectacle::Integrations::Minitest.tracer
+          tracer = Spectracer::Integrations::Minitest.tracer
           return unless tracer
 
           file_path = method(name).source_location&.first
@@ -40,7 +40,7 @@ module Spectacle
         end
 
         def run
-          tracer = Spectacle::Integrations::Minitest.tracer
+          tracer = Spectracer::Integrations::Minitest.tracer
           return super unless tracer
 
           tracer.with_tracing { super }
@@ -50,6 +50,6 @@ module Spectacle
   end
 end
 
-if defined?(::Minitest::Test) && ENV["WITH_SPECTACLE_TRACING"] == "true"
-  ::Minitest::Test.prepend(Spectacle::Integrations::Minitest::TestCasePlugin)
+if defined?(::Minitest::Test) && ENV["WITH_SPECTRACER_TRACING"] == "true"
+  ::Minitest::Test.prepend(Spectracer::Integrations::Minitest::TestCasePlugin)
 end

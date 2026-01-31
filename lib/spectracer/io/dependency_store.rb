@@ -4,7 +4,7 @@ require "fileutils"
 require "json"
 require "zlib"
 
-module Spectacle
+module Spectracer
   module IO
     class DependencyStore
       def initialize(logger: nil)

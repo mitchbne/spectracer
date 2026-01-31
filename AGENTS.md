@@ -1,8 +1,8 @@
-# Spectacle - Agent Instructions
+# Spectracer - Agent Instructions
 
 ## Overview
 
-Spectacle is a Ruby gem that traces RSpec/Minitest dependencies and determines which specs to run based on git changes. It integrates with Buildkite CI for parallel test optimization.
+Spectracer is a Ruby gem that traces RSpec/Minitest dependencies and determines which specs to run based on git changes. It integrates with Buildkite CI for parallel test optimization.
 
 ## Commands
 
@@ -32,7 +32,7 @@ bundle exec rake install             # Install locally
 ## Architecture
 
 ```
-lib/spectacle/
+lib/spectracer/
 ├── core/                    # Pure business logic (no I/O)
 │   ├── paths.rb             # Path computation from env
 │   └── spec_selector.rb     # Spec selection algorithm
@@ -53,7 +53,7 @@ lib/spectacle/
 │   ├── railtie.rb
 │   └── rspec.rb
 ├── tasks/
-│   └── spectacle.rake
+│   └── spectracer.rake
 ├── logger.rb
 └── version.rb
 ```
@@ -65,7 +65,7 @@ lib/spectacle/
 - I/O classes wrap external dependencies and are mockable
 - Use `frozen_string_literal: true` in all files
 - Follow StandardRB style (double quotes, no trailing commas)
-- RBS type signatures in `sig/spectacle.rbs`
+- RBS type signatures in `sig/spectracer.rbs`
 
 ## Key Design Decisions
 
@@ -78,15 +78,15 @@ lib/spectacle/
 
 - Unit tests mock collaborators using `instance_double`
 - Integration tests use real git operations
-- Test files mirror source structure: `lib/spectacle/core/paths.rb` → `spec/core/paths_spec.rb`
+- Test files mirror source structure: `lib/spectracer/core/paths.rb` → `spec/core/paths_spec.rb`
 
 ## Environment Variables
 
 | Variable | Purpose |
 |----------|---------|
-| `WITH_SPECTACLE_TRACING` | Enable dependency tracing (`"true"`) |
-| `WITH_SPECTACLE_DEBUG` | Enable debug logging (`"true"`) |
-| `SPECTACLE_TMP_DIRECTORY` | Override output directory |
+| `WITH_SPECTRACER_TRACING` | Enable dependency tracing (`"true"`) |
+| `WITH_SPECTRACER_DEBUG` | Enable debug logging (`"true"`) |
+| `SPECTRACER_TMP_DIRECTORY` | Override output directory |
 | `BUILDKITE_BUILD_ID` | Buildkite build identifier |
 | `BUILDKITE_JOB_ID` | Buildkite job identifier |
 | `BUILDKITE_BRANCH` | Current branch name |

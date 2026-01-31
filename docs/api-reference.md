@@ -2,59 +2,59 @@
 
 ## Rake Tasks
 
-### spectacle:install
+### spectracer:install
 
-Creates a default `.spectacle.yml` configuration file.
+Creates a default `.spectracer.yml` configuration file.
 
 ```bash
-bundle exec rake spectacle:install
+bundle exec rake spectracer:install
 ```
 
-### spectacle:collect_dependencies
+### spectracer:collect_dependencies
 
 Combines individual trace files into a single inverse dependency map.
 
 ```bash
-bundle exec rake spectacle:collect_dependencies
+bundle exec rake spectracer:collect_dependencies
 ```
 
-**Input:** `tmp/spectacle/tracing_output/{build_id}/*.json.gz`
-**Output:** `tmp/spectacle/dependencies.json.gz`
+**Input:** `tmp/spectracer/tracing_output/{build_id}/*.json.gz`
+**Output:** `tmp/spectracer/dependencies.json.gz`
 
-### spectacle:spec_determiner
+### spectracer:spec_determiner
 
 Outputs the spec files/patterns to run based on changed files.
 
 ```bash
-SPECS=$(bundle exec rake spectacle:spec_determiner)
+SPECS=$(bundle exec rake spectracer:spec_determiner)
 echo $SPECS  # => 'spec/models/user_spec.rb,spec/controllers/users_controller_spec.rb'
 ```
 
 ## Ruby API
 
-### Spectacle Module
+### Spectracer Module
 
 ```ruby
 # Get the shared logger
-Spectacle.logger  # => Spectacle::Logger
+Spectracer.logger  # => Spectracer::Logger
 
 # Get shared paths instance
-Spectacle.paths   # => Spectacle::Core::Paths
+Spectracer.paths   # => Spectracer::Core::Paths
 ```
 
-### Spectacle::Core::Paths
+### Spectracer::Core::Paths
 
 Computes file paths based on environment.
 
 ```ruby
-paths = Spectacle::Core::Paths.new(env: ENV)
+paths = Spectracer::Core::Paths.new(env: ENV)
 
 paths.build_id                    # => "abc123" or "local"
 paths.job_id                      # => "def456" or "local"
-paths.output_directory            # => "tmp/spectacle"
-paths.spec_artifact_output_file   # => "tmp/spectacle/tracing_output/abc123/def456.json.gz"
-paths.spec_artifacts_download_glob # => "tmp/spectacle/tracing_output/abc123/*.json.gz"
-paths.collected_dependencies_file  # => "tmp/spectacle/dependencies.json.gz"
+paths.output_directory            # => "tmp/spectracer"
+paths.spec_artifact_output_file   # => "tmp/spectracer/tracing_output/abc123/def456.json.gz"
+paths.spec_artifacts_download_glob # => "tmp/spectracer/tracing_output/abc123/*.json.gz"
+paths.collected_dependencies_file  # => "tmp/spectracer/dependencies.json.gz"
 
 # Path normalization
 paths.normalize("/home/user/project/app/models/user.rb", repo_root: "/home/user/project")
@@ -64,12 +64,12 @@ paths.strip_dot_prefix("./app/models/user.rb")
 # => "app/models/user.rb"
 ```
 
-### Spectacle::Core::SpecSelector
+### Spectracer::Core::SpecSelector
 
 Pure function for spec selection logic.
 
 ```ruby
-selector = Spectacle::Core::SpecSelector.new
+selector = Spectracer::Core::SpecSelector.new
 
 result = selector.call(
   changed_files: ["app/models/user.rb", "spec/models/post_spec.rb"],
@@ -84,12 +84,12 @@ result = selector.call(
 # => "spec/models/post_spec.rb,spec/models/user_spec.rb"
 ```
 
-### Spectacle::IO::GitAdapter
+### Spectracer::IO::GitAdapter
 
 Wrapper for git operations.
 
 ```ruby
-adapter = Spectacle::IO::GitAdapter.new(working_dir: Dir.pwd, logger: nil)
+adapter = Spectracer::IO::GitAdapter.new(working_dir: Dir.pwd, logger: nil)
 
 adapter.repository_root           # => "/home/user/project"
 adapter.current_branch            # => "feature/new-thing"
@@ -98,12 +98,12 @@ adapter.changed_files_in_commit("abc123")  # => ["app/models/user.rb"]
 adapter.changed_files_against("main", cached: true)  # => ["lib/new.rb"]
 ```
 
-### Spectacle::IO::DependencyStore
+### Spectracer::IO::DependencyStore
 
 Handles gzipped JSON storage.
 
 ```ruby
-store = Spectacle::IO::DependencyStore.new(logger: nil)
+store = Spectracer::IO::DependencyStore.new(logger: nil)
 
 # Write data
 store.write(
@@ -116,16 +116,16 @@ data = store.read("deps.json.gz")
 # => {"spec/user_spec.rb" => ["app/models/user.rb"]}
 
 # Find files
-files = store.glob("tmp/spectacle/**/*.json.gz")
-# => ["tmp/spectacle/tracing_output/build1/job1.json.gz", ...]
+files = store.glob("tmp/spectracer/**/*.json.gz")
+# => ["tmp/spectracer/tracing_output/build1/job1.json.gz", ...]
 ```
 
-### Spectacle::IO::ConfigLoader
+### Spectracer::IO::ConfigLoader
 
 Loads and parses configuration.
 
 ```ruby
-loader = Spectacle::IO::ConfigLoader.new(logger: nil)
+loader = Spectracer::IO::ConfigLoader.new(logger: nil)
 
 config = loader.load
 # => {
@@ -137,13 +137,13 @@ config = loader.load
 # }
 ```
 
-### Spectacle::Providers::GitChangedFiles
+### Spectracer::Providers::GitChangedFiles
 
 Detects changed files using git.
 
 ```ruby
-provider = Spectacle::Providers::GitChangedFiles.new(
-  git_adapter: Spectacle::IO::GitAdapter.new,
+provider = Spectracer::Providers::GitChangedFiles.new(
+  git_adapter: Spectracer::IO::GitAdapter.new,
   env: ENV,
   logger: nil
 )
@@ -152,27 +152,27 @@ files = provider.call
 # => ["app/models/user.rb", "spec/models/user_spec.rb"]
 ```
 
-### Spectacle::Providers::Repository
+### Spectracer::Providers::Repository
 
 Provides repository information.
 
 ```ruby
-repo = Spectacle::Providers::Repository.new(
-  git_adapter: Spectacle::IO::GitAdapter.new
+repo = Spectracer::Providers::Repository.new(
+  git_adapter: Spectracer::IO::GitAdapter.new
 )
 
 repo.root  # => "/home/user/project"
 ```
 
-### Spectacle::Orchestrators::DependencyTracer
+### Spectracer::Orchestrators::DependencyTracer
 
 Traces spec dependencies during test execution.
 
 ```ruby
-tracer = Spectacle::Orchestrators::DependencyTracer.new(
-  paths: Spectacle::Core::Paths.new,
-  store: Spectacle::IO::DependencyStore.new,
-  repository: Spectacle::Providers::Repository.new,
+tracer = Spectracer::Orchestrators::DependencyTracer.new(
+  paths: Spectracer::Core::Paths.new,
+  store: Spectracer::IO::DependencyStore.new,
+  repository: Spectracer::Providers::Repository.new,
   logger: nil
 )
 
@@ -183,29 +183,29 @@ end
 tracer.write_output!
 ```
 
-### Spectacle::Orchestrators::DependencyCollector
+### Spectracer::Orchestrators::DependencyCollector
 
 Collects and combines trace files.
 
 ```ruby
-Spectacle::Orchestrators::DependencyCollector.collect!(logger: nil)
+Spectracer::Orchestrators::DependencyCollector.collect!(logger: nil)
 ```
 
-### Spectacle::Orchestrators::SpecRunDeterminer
+### Spectracer::Orchestrators::SpecRunDeterminer
 
 Determines which specs to run.
 
 ```ruby
-result = Spectacle::Orchestrators::SpecRunDeterminer.determine!(logger: nil)
+result = Spectracer::Orchestrators::SpecRunDeterminer.determine!(logger: nil)
 # => "spec/models/user_spec.rb,spec/controllers/users_spec.rb"
 ```
 
-### Spectacle::Logger
+### Spectracer::Logger
 
 Configurable logger for debug output.
 
 ```ruby
-logger = Spectacle::Logger.new(
+logger = Spectracer::Logger.new(
   output: $stderr,
   level: :debug,  # :debug, :info, :warn, :error
   enabled: true
@@ -221,32 +221,32 @@ logger.error("Error message")
 
 ### RSpec
 
-Automatically installed when Spectacle is required and `WITH_SPECTACLE_TRACING=true`:
+Automatically installed when Spectracer is required and `WITH_SPECTRACER_TRACING=true`:
 
 ```ruby
-require "spectacle"
+require "spectracer"
 # RSpec hooks are automatically configured
 ```
 
 Manual installation:
 
 ```ruby
-Spectacle::Integrations::RSpec.install!
+Spectracer::Integrations::RSpec.install!
 ```
 
 ### Minitest
 
-Automatically installed when Spectacle is required and `WITH_SPECTACLE_TRACING=true`:
+Automatically installed when Spectracer is required and `WITH_SPECTRACER_TRACING=true`:
 
 ```ruby
-require "spectacle"
+require "spectracer"
 # Minitest hooks are automatically configured
 ```
 
 Manual installation:
 
 ```ruby
-Spectacle::Integrations::Minitest.install!
+Spectracer::Integrations::Minitest.install!
 ```
 
 ### Rails
@@ -255,10 +255,10 @@ Railtie automatically loads rake tasks when Rails is detected:
 
 ```ruby
 # Gemfile
-gem "spectacle"
+gem "spectracer"
 
 # Rake tasks available automatically:
-# rake spectacle:install
-# rake spectacle:collect_dependencies
-# rake spectacle:spec_determiner
+# rake spectracer:install
+# rake spectracer:collect_dependencies
+# rake spectracer:spec_determiner
 ```

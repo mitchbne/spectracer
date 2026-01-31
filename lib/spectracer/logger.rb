@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Spectacle
+module Spectracer
   class Logger
     LEVELS = {debug: 0, info: 1, warn: 2, error: 3}.freeze
 
@@ -32,7 +32,7 @@ module Spectacle
       return unless @enabled
       return if LEVELS[level] < @level
 
-      @output.puts "[Spectacle] #{level.upcase}: #{message}"
+      @output.puts "[Spectracer] #{level.upcase}: #{message}"
     end
   end
 end

@@ -1,6 +1,6 @@
 # Buildkite Integration Guide
 
-Spectacle is designed to work seamlessly with Buildkite CI for parallel test optimization.
+Spectracer is designed to work seamlessly with Buildkite CI for parallel test optimization.
 
 ## Overview
 
@@ -12,7 +12,7 @@ The typical workflow involves three phases:
 
 ## Environment Variables
 
-Spectacle automatically reads these Buildkite environment variables:
+Spectracer automatically reads these Buildkite environment variables:
 
 | Variable | Purpose |
 |----------|---------|
@@ -29,22 +29,22 @@ steps:
   - label: ":rspec: Full Suite"
     command: |
       bundle install
-      WITH_SPECTACLE_TRACING=true bundle exec rspec
+      WITH_SPECTRACER_TRACING=true bundle exec rspec
     branches: main
     artifact_paths:
-      - "tmp/spectacle/**/*"
+      - "tmp/spectracer/**/*"
     key: "full-suite"
 
   # Collect dependencies after full suite
   - label: ":package: Collect Dependencies"
     command: |
       bundle install
-      buildkite-agent artifact download "tmp/spectacle/**/*" .
-      bundle exec rake spectacle:collect_dependencies
+      buildkite-agent artifact download "tmp/spectracer/**/*" .
+      bundle exec rake spectracer:collect_dependencies
     branches: main
     depends_on: "full-suite"
     artifact_paths:
-      - "tmp/spectacle/dependencies.json.gz"
+      - "tmp/spectracer/dependencies.json.gz"
     key: "collect-deps"
 
   # Run affected specs on feature branches
@@ -52,8 +52,8 @@ steps:
     command: |
       bundle install
       # Download latest dependencies from main
-      buildkite-agent artifact download "tmp/spectacle/dependencies.json.gz" . --build "latest" --branch main || true
-      SPECS=$(bundle exec rake spectacle:spec_determiner 2>/dev/null | tr -d "'")
+      buildkite-agent artifact download "tmp/spectracer/dependencies.json.gz" . --build "latest" --branch main || true
+      SPECS=$(bundle exec rake spectracer:spec_determiner 2>/dev/null | tr -d "'")
       if [ -n "$SPECS" ]; then
         bundle exec rspec $SPECS
       else
@@ -72,23 +72,23 @@ steps:
   - label: ":rspec: Suite %n"
     command: |
       bundle install
-      WITH_SPECTACLE_TRACING=true bundle exec rspec --format progress
+      WITH_SPECTRACER_TRACING=true bundle exec rspec --format progress
     branches: main
     parallelism: 4
     artifact_paths:
-      - "tmp/spectacle/**/*"
+      - "tmp/spectracer/**/*"
     key: "parallel-suite"
 
   # Collect from all parallel jobs
   - label: ":package: Collect Dependencies"
     command: |
       bundle install
-      buildkite-agent artifact download "tmp/spectacle/**/*" .
-      bundle exec rake spectacle:collect_dependencies
+      buildkite-agent artifact download "tmp/spectracer/**/*" .
+      bundle exec rake spectracer:collect_dependencies
     branches: main
     depends_on: "parallel-suite"
     artifact_paths:
-      - "tmp/spectacle/dependencies.json.gz"
+      - "tmp/spectracer/dependencies.json.gz"
 ```
 
 ## Scheduled Tracing
@@ -101,18 +101,18 @@ steps:
   - label: ":rspec: Nightly Trace"
     command: |
       bundle install
-      WITH_SPECTACLE_TRACING=true bundle exec rspec
+      WITH_SPECTRACER_TRACING=true bundle exec rspec
     artifact_paths:
-      - "tmp/spectacle/**/*"
+      - "tmp/spectracer/**/*"
     key: "nightly-trace"
 
   - label: ":package: Update Dependencies"
     command: |
       bundle install
-      buildkite-agent artifact download "tmp/spectacle/**/*" .
-      bundle exec rake spectacle:collect_dependencies
+      buildkite-agent artifact download "tmp/spectracer/**/*" .
+      bundle exec rake spectracer:collect_dependencies
       # Upload to a persistent location (S3, artifact storage, etc.)
-      aws s3 cp tmp/spectacle/dependencies.json.gz s3://my-bucket/spectacle/
+      aws s3 cp tmp/spectracer/dependencies.json.gz s3://my-bucket/spectracer/
     depends_on: "nightly-trace"
 ```
 
@@ -124,28 +124,28 @@ steps:
     command: |
       bundle install
       # Download from persistent storage
-      aws s3 cp s3://my-bucket/spectacle/dependencies.json.gz tmp/spectacle/ || true
-      SPECS=$(bundle exec rake spectacle:spec_determiner 2>/dev/null | tr -d "'")
+      aws s3 cp s3://my-bucket/spectracer/dependencies.json.gz tmp/spectracer/ || true
+      SPECS=$(bundle exec rake spectracer:spec_determiner 2>/dev/null | tr -d "'")
       bundle exec rspec $SPECS
 ```
 
 ## Artifact Paths
 
-Spectacle uses these artifact paths by default:
+Spectracer uses these artifact paths by default:
 
 | Path | Contents |
 |------|----------|
-| `tmp/spectacle/tracing_output/{build_id}/{job_id}.json.gz` | Per-job trace output |
-| `tmp/spectacle/dependencies.json.gz` | Combined inverse dependencies |
+| `tmp/spectracer/tracing_output/{build_id}/{job_id}.json.gz` | Per-job trace output |
+| `tmp/spectracer/dependencies.json.gz` | Combined inverse dependencies |
 
-Override with `SPECTACLE_TMP_DIRECTORY`:
+Override with `SPECTRACER_TMP_DIRECTORY`:
 
 ```yaml
 - command: |
-    export SPECTACLE_TMP_DIRECTORY=".spectacle-output"
-    WITH_SPECTACLE_TRACING=true bundle exec rspec
+    export SPECTRACER_TMP_DIRECTORY=".spectracer-output"
+    WITH_SPECTRACER_TRACING=true bundle exec rspec
   artifact_paths:
-    - ".spectacle-output/**/*"
+    - ".spectracer-output/**/*"
 ```
 
 ## Debugging
@@ -154,7 +154,7 @@ Enable debug output to troubleshoot issues:
 
 ```yaml
 - command: |
-    WITH_SPECTACLE_DEBUG=true bundle exec rake spectacle:spec_determiner
+    WITH_SPECTRACER_DEBUG=true bundle exec rake spectracer:spec_determiner
 ```
 
 This will output:
@@ -168,12 +168,12 @@ This will output:
 
 ### No Dependencies File
 
-If the dependencies file doesn't exist, Spectacle falls back to `on_empty_spec_set`:
+If the dependencies file doesn't exist, Spectracer falls back to `on_empty_spec_set`:
 
 ```yaml
 - command: |
-    buildkite-agent artifact download "tmp/spectacle/dependencies.json.gz" . || echo "No deps file, running fallback"
-    SPECS=$(bundle exec rake spectacle:spec_determiner 2>/dev/null | tr -d "'")
+    buildkite-agent artifact download "tmp/spectracer/dependencies.json.gz" . || echo "No deps file, running fallback"
+    SPECS=$(bundle exec rake spectracer:spec_determiner 2>/dev/null | tr -d "'")
     bundle exec rspec ${SPECS:-spec/smoke/**/*_spec.rb}
 ```
 
@@ -183,7 +183,7 @@ Handle cases where no specs need to run:
 
 ```yaml
 - command: |
-    SPECS=$(bundle exec rake spectacle:spec_determiner 2>/dev/null | tr -d "'")
+    SPECS=$(bundle exec rake spectracer:spec_determiner 2>/dev/null | tr -d "'")
     if [ -z "$SPECS" ] || [ "$SPECS" = "''" ]; then
       echo "No specs affected by changes"
       exit 0

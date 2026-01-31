@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Core::Paths do
+RSpec.describe Spectracer::Core::Paths do
   subject(:paths) { described_class.new(env: env) }
 
   let(:env) { {} }
@@ -38,17 +38,17 @@ RSpec.describe Spectacle::Core::Paths do
   end
 
   describe "#output_directory" do
-    context "when SPECTACLE_TMP_DIRECTORY is set" do
-      let(:env) { {"SPECTACLE_TMP_DIRECTORY" => "/custom/path"} }
+    context "when SPECTRACER_TMP_DIRECTORY is set" do
+      let(:env) { {"SPECTRACER_TMP_DIRECTORY" => "/custom/path"} }
 
       it "returns the custom path" do
         expect(paths.output_directory).to eq("/custom/path")
       end
     end
 
-    context "when SPECTACLE_TMP_DIRECTORY is not set" do
+    context "when SPECTRACER_TMP_DIRECTORY is not set" do
       it "returns the default path" do
-        expect(paths.output_directory).to eq("tmp/spectacle")
+        expect(paths.output_directory).to eq("tmp/spectracer")
       end
     end
   end
@@ -57,7 +57,7 @@ RSpec.describe Spectacle::Core::Paths do
     let(:env) { {"BUILDKITE_BUILD_ID" => "build1", "BUILDKITE_JOB_ID" => "job1"} }
 
     it "returns the correct path" do
-      expect(paths.spec_artifact_output_file).to eq("tmp/spectacle/tracing_output/build1/job1.json.gz")
+      expect(paths.spec_artifact_output_file).to eq("tmp/spectracer/tracing_output/build1/job1.json.gz")
     end
   end
 

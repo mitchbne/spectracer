@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spectacle::Logger do
+RSpec.describe Spectracer::Logger do
   let(:output) { StringIO.new }
 
   describe "when disabled" do
@@ -21,22 +21,22 @@ RSpec.describe Spectacle::Logger do
 
     it "outputs debug messages" do
       logger.debug("debug message")
-      expect(output.string).to include("[Spectacle] DEBUG: debug message")
+      expect(output.string).to include("[Spectracer] DEBUG: debug message")
     end
 
     it "outputs info messages" do
       logger.info("info message")
-      expect(output.string).to include("[Spectacle] INFO: info message")
+      expect(output.string).to include("[Spectracer] INFO: info message")
     end
 
     it "outputs warn messages" do
       logger.warn("warn message")
-      expect(output.string).to include("[Spectacle] WARN: warn message")
+      expect(output.string).to include("[Spectracer] WARN: warn message")
     end
 
     it "outputs error messages" do
       logger.error("error message")
-      expect(output.string).to include("[Spectacle] ERROR: error message")
+      expect(output.string).to include("[Spectracer] ERROR: error message")
     end
   end
 

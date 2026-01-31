@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in spectacle.gemspec
+# Specify your gem's dependencies in spectracer.gemspec
 gemspec
 
 gem "rake", "~> 13.0"
