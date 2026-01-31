@@ -1,0 +1,29 @@
+FROM buildkite/hosted-agent-base-images:ubuntu-jammy
+RUN apt-get update && apt-get install -y \
+  git \
+  jq \
+  curl \
+  autoconf \
+  bison \
+  build-essential \
+  libssl-dev \
+  libyaml-dev \
+  libreadline6-dev \
+  zlib1g-dev \
+  libncurses5-dev \
+  libffi-dev \
+  libgdbm6 \
+  libgdbm-dev \
+  libdb-dev
+
+# Install mise
+RUN curl https://mise.run | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+# Activate mise in shell
+RUN echo 'eval "$(mise activate bash)"' >> ~/.bashrc
+SHELL ["/bin/bash", "-l", "-c"]
+
+# Copy version files and install Ruby
+COPY .ruby-version .tool-versions* ./
+RUN mise install && gem install bundler
