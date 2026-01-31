@@ -26,4 +26,4 @@ SHELL ["/bin/bash", "-l", "-c"]
 
 # Copy version files and install Ruby
 COPY .ruby-version .tool-versions* ./
-RUN mise install && gem install bundler
+RUN mise install && mise exec -- gem install bundler
