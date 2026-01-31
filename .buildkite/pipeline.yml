@@ -74,18 +74,18 @@ steps:
         key: "determine-specs"
         command: |
           bundle install --jobs 4
-          
+
           echo "--- Downloading dependency map from main branch"
           # Try to download latest dependencies from main
           buildkite-agent artifact download "tmp/spectracer/dependencies.json.gz" . \
             --build "latest" \
             --branch main || echo "No dependency map found, will run fallback"
-          
+
           echo "--- Determining specs to run"
           if [ -f "tmp/spectracer/dependencies.json.gz" ]; then
             SPECS=$$(WITH_SPECTRACER_DEBUG=true bundle exec rake spectracer:spec_determiner 2>&1 | tee /dev/stderr | tail -1 | tr -d "'")
             echo "Specs to run: $$SPECS"
-            
+
             if [ -z "$$SPECS" ] || [ "$$SPECS" = "" ]; then
               echo "No specs affected, running smoke tests"
               SPECS="spec/spectracer_spec.rb"
@@ -94,7 +94,7 @@ steps:
             echo "No dependency map, running full suite"
             SPECS="spec"
           fi
-          
+
           # Save specs to metadata for next step
           buildkite-agent meta-data set "specs-to-run" "$$SPECS"
         plugins:
@@ -108,10 +108,10 @@ steps:
         depends_on: "determine-specs"
         command: |
           bundle install --jobs 4
-          
+
           SPECS=$$(buildkite-agent meta-data get "specs-to-run")
           echo "--- Running: $$SPECS"
-          
+
           if [ "$$SPECS" = "spec" ]; then
             bundle exec rspec --exclude-pattern "spec/e2e/**/*_spec.rb" --format progress
           else
@@ -137,7 +137,7 @@ steps:
               image: "ruby:${RUBY_VERSION}"
               propagate-environment: true
 
-      - label: ":standardrb: Lint"
+      - label: ":rubocop: Lint"
         key: "lint-branch"
         command: |
           bundle install --jobs 4
