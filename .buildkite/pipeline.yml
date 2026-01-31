@@ -17,7 +17,7 @@ steps:
         key: "rspec-traced"
         command: |
           bundle install --jobs 4
-          WITH_SPECTRACER_TRACING=true bundle exec rspec --format progress --format json --out tmp/rspec-results.json
+          WITH_SPECTRACER_TRACING=true bundle exec rspec --exclude-pattern "spec/e2e/**/*_spec.rb" --format progress --format json --out tmp/rspec-results.json
         artifact_paths:
           - "tmp/spectracer/**/*"
           - "tmp/rspec-results.json"
@@ -26,6 +26,16 @@ steps:
               image: "ruby:${RUBY_VERSION}"
               propagate-environment: true
               mount-buildkite-agent: true
+
+      - label: ":test_tube: E2E Tests"
+        key: "e2e-tests"
+        command: |
+          bundle install --jobs 4
+          bundle exec rspec spec/e2e --format progress
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
 
       - label: ":standardrb: Lint"
         key: "lint"
@@ -103,7 +113,7 @@ steps:
           echo "--- Running: $$SPECS"
           
           if [ "$$SPECS" = "spec" ]; then
-            bundle exec rspec --format progress
+            bundle exec rspec --exclude-pattern "spec/e2e/**/*_spec.rb" --format progress
           else
             # Handle comma-separated spec list
             SPEC_ARGS=$$(echo "$$SPECS" | tr ',' ' ')
@@ -116,6 +126,16 @@ steps:
               image: "ruby:${RUBY_VERSION}"
               propagate-environment: true
               mount-buildkite-agent: true
+
+      - label: ":test_tube: E2E Tests"
+        key: "e2e-tests-branch"
+        command: |
+          bundle install --jobs 4
+          bundle exec rspec spec/e2e --format progress
+        plugins:
+          - docker#v5.11.0:
+              image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
 
       - label: ":standardrb: Lint"
         key: "lint-branch"
