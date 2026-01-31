@@ -1,5 +1,9 @@
 # Spectracer CI Pipeline
 # Meta: Uses Spectracer to test Spectracer! 🔮
+common:
+  - buildkite_cache: &buildkite-cache
+      buildkite/zstash:
+        ids: "ruby-cache"
 
 env:
   RUBY_VERSION: "3.3"
@@ -21,31 +25,20 @@ steps:
         artifact_paths:
           - "tmp/spectracer/**/*"
           - "tmp/rspec-results.json"
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
-              mount-buildkite-agent: true
-
+        plugins: [*buildkite-cache]
       - label: ":test_tube: E2E RSpec"
         key: "e2e-rspec"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
+        plugins: [*buildkite-cache]
 
       - label: ":test_tube: E2E Minitest"
         key: "e2e-minitest"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
+        plugins: [*buildkite-cache]
 
       - label: ":package: Collect Dependencies"
         key: "collect-deps"
@@ -58,12 +51,7 @@ steps:
           ls -la tmp/spectracer/
         artifact_paths:
           - "tmp/spectracer/dependencies.json.gz"
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
-              mount-buildkite-agent: true
-
+        plugins: [*buildkite-cache]
   # ============================================================================
   # Feature Branches: Run only affected specs (using Spectracer!)
   # ============================================================================
@@ -98,12 +86,7 @@ steps:
 
           # Save specs to metadata for next step
           buildkite-agent meta-data set "specs-to-run" "$$SPECS"
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
-              mount-buildkite-agent: true
-
+        plugins: [*buildkite-cache]
       - label: ":rspec: Run Affected Specs"
         key: "run-affected"
         depends_on: "determine-specs"
@@ -122,31 +105,20 @@ steps:
           fi
         artifact_paths:
           - "tmp/rspec-*.json"
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
-              mount-buildkite-agent: true
-
+        plugins: [*buildkite-cache]
       - label: ":test_tube: E2E RSpec"
         key: "e2e-rspec-branch"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
+        plugins: [*buildkite-cache]
 
       - label: ":test_tube: E2E Minitest"
         key: "e2e-minitest-branch"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
-        plugins:
-          - docker#v5.11.0:
-              image: "ruby:${RUBY_VERSION}"
-              propagate-environment: true
+        plugins: [*buildkite-cache]
 
   # ============================================================================
   # All Branches: Build verification
@@ -156,8 +128,7 @@ steps:
     command: |
       bundle install --jobs 4
       bundle exec standardrb
-    plugins:
-      - docker#v5.11.0:
+    plugins: [*buildkite-cache]
           image: "ruby:${RUBY_VERSION}"
 
   - label: ":gem: Build Gem"
@@ -169,6 +140,5 @@ steps:
       ls -la pkg/
     artifact_paths:
       - "pkg/*.gem"
-    plugins:
-      - docker#v5.11.0:
+    plugins: [*buildkite-cache]
           image: "ruby:${RUBY_VERSION}"
