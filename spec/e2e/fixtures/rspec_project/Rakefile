@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+require "rspec/core/rake_task"
+require "spectracer"
+
+load "spectracer/tasks/spectracer.rake"
+
+RSpec::Core::RakeTask.new(:spec)
+
+task default: :spec
