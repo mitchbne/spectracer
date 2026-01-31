@@ -9,7 +9,7 @@ export DOCKER_REPOSITORY="${REGISTRY}/${SERVICE}:latest"
 docker buildx build \
   --no-cache \
   --file .buildkite/Dockerfile.build \
-  --platform linux/amd64,linux/arm64 \
+  --platform linux/amd64 \
   --tag "${DOCKER_REPOSITORY}" \
   --progress plain \
   --push .
