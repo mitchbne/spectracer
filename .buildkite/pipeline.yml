@@ -7,9 +7,9 @@ common:
         post-command: buildkite-agent cache save --ids ruby-cache
 
 env:
-  RUBY_VERSION: "3.3"
   SPECTRACER_TMP_DIRECTORY: "tmp/spectracer"
   BUNDLE_PATH: "vendor/bundle"
+  BUNDLE_FROZEN: true # Don't allow lockfile to mutate during CI
 
 steps:
   # ============================================================================
