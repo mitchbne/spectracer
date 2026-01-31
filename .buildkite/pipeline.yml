@@ -123,13 +123,12 @@ steps:
   # ============================================================================
   # All Branches: Build verification
   # ============================================================================
-  - label: ":standardrb: Lint"
+  - label: ":rubocop: Lint"
     key: "lint"
     command: |
       bundle install --jobs 4
       bundle exec standardrb
     plugins: [*buildkite-cache]
-          image: "ruby:${RUBY_VERSION}"
 
   - label: ":gem: Build Gem"
     key: "build-gem"
@@ -141,4 +140,3 @@ steps:
     artifact_paths:
       - "pkg/*.gem"
     plugins: [*buildkite-cache]
-          image: "ruby:${RUBY_VERSION}"
