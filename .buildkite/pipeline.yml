@@ -27,24 +27,25 @@ steps:
               propagate-environment: true
               mount-buildkite-agent: true
 
-      - label: ":test_tube: E2E Tests"
-        key: "e2e-tests"
+      - label: ":test_tube: E2E RSpec"
+        key: "e2e-rspec"
         command: |
           bundle install --jobs 4
-          bundle exec rspec spec/e2e --format progress
+          bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
         plugins:
           - docker#v5.11.0:
               image: "ruby:${RUBY_VERSION}"
               propagate-environment: true
 
-      - label: ":standardrb: Lint"
-        key: "lint"
+      - label: ":test_tube: E2E Minitest"
+        key: "e2e-minitest"
         command: |
           bundle install --jobs 4
-          bundle exec standardrb
+          bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
         plugins:
           - docker#v5.11.0:
               image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
 
       - label: ":package: Collect Dependencies"
         key: "collect-deps"
@@ -127,28 +128,38 @@ steps:
               propagate-environment: true
               mount-buildkite-agent: true
 
-      - label: ":test_tube: E2E Tests"
-        key: "e2e-tests-branch"
+      - label: ":test_tube: E2E RSpec"
+        key: "e2e-rspec-branch"
         command: |
           bundle install --jobs 4
-          bundle exec rspec spec/e2e --format progress
+          bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
         plugins:
           - docker#v5.11.0:
               image: "ruby:${RUBY_VERSION}"
               propagate-environment: true
 
-      - label: ":rubocop: Lint"
-        key: "lint-branch"
+      - label: ":test_tube: E2E Minitest"
+        key: "e2e-minitest-branch"
         command: |
           bundle install --jobs 4
-          bundle exec standardrb
+          bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
         plugins:
           - docker#v5.11.0:
               image: "ruby:${RUBY_VERSION}"
+              propagate-environment: true
 
   # ============================================================================
   # All Branches: Build verification
   # ============================================================================
+  - label: ":standardrb: Lint"
+    key: "lint"
+    command: |
+      bundle install --jobs 4
+      bundle exec standardrb
+    plugins:
+      - docker#v5.11.0:
+          image: "ruby:${RUBY_VERSION}"
+
   - label: ":gem: Build Gem"
     key: "build-gem"
     command: |
