@@ -20,10 +20,10 @@ RUN apt-get update && apt-get install -y \
 RUN curl https://mise.run | sh
 ENV PATH="/root/.local/bin:$PATH"
 
-# Activate mise in shell
-RUN echo 'eval "$(mise activate bash)"' >> ~/.bashrc
-SHELL ["/bin/bash", "-l", "-c"]
-
 # Copy version files and install Ruby
 COPY .ruby-version .tool-versions* ./
 RUN mise install && mise exec -- gem install bundler
+
+# Add mise shims to PATH for non-interactive shells
+RUN mise reshim
+ENV PATH="/root/.local/share/mise/shims:$PATH"
