@@ -76,6 +76,170 @@ RSpec.describe "RSpec Integration", :e2e do
     end
   end
 
+  describe "gem path filtering" do
+    it "excludes gem paths from traced dependencies" do
+      Bundler.with_unbundled_env do
+        Dir.chdir(tmp_dir) do
+          output = `WITH_SPECTRACER_TRACING=true SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rspec --format progress 2>&1`
+          expect($?.success?).to be(true), "RSpec failed: #{output}"
+
+          dependency_files = Dir.glob("#{tmp_dir}/tracing_output/**/*.json.gz")
+          expect(dependency_files).not_to be_empty
+
+          require "zlib"
+          require "json"
+
+          dependency_files.each do |file|
+            content = Zlib::GzipReader.open(file) { |gz| JSON.parse(gz.read) }
+            content.each do |_spec_file, deps|
+              deps.each do |dep|
+                expect(dep).not_to include("/gems/"), "Found gem path in dependencies: #{dep}"
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe "full tracing flow" do
+    it "traces dependencies and collects inverse dependency map" do
+      Bundler.with_unbundled_env do
+        Dir.chdir(tmp_dir) do
+          trace_output = `WITH_SPECTRACER_TRACING=true SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rspec --format progress 2>&1`
+          expect($?.success?).to be(true), "RSpec tracing failed: #{trace_output}"
+
+          collect_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:collect_dependencies 2>&1`
+          expect($?.success?).to be(true), "Collect dependencies failed: #{collect_output}"
+
+          collected_file = File.join(tmp_dir, "dependencies.json.gz")
+          expect(File.exist?(collected_file)).to be(true), "Collected dependencies file not found"
+
+          require "zlib"
+          require "json"
+
+          inverse_deps = Zlib::GzipReader.open(collected_file) { |gz| JSON.parse(gz.read) }
+          expect(inverse_deps).to be_a(Hash)
+          expect(inverse_deps.keys).to include("./lib/calculator.rb")
+        end
+      end
+    end
+
+    it "determines affected specs from uncommitted changes (local/pre-commit)" do
+      Bundler.with_unbundled_env do
+        Dir.chdir(tmp_dir) do
+          trace_output = `WITH_SPECTRACER_TRACING=true SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rspec --format progress 2>&1`
+          expect($?.success?).to be(true), "RSpec tracing failed: #{trace_output}"
+
+          collect_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:collect_dependencies 2>&1`
+          expect($?.success?).to be(true), "Collect dependencies failed: #{collect_output}"
+
+          system("git add -A && git commit -m 'Initial commit' --quiet", exception: true)
+
+          File.write("lib/calculator.rb", <<~RUBY)
+            # frozen_string_literal: true
+
+            class Calculator
+              def add(a, b)
+                a + b + 0 # Modified but uncommitted!
+              end
+
+              def subtract(a, b)
+                a - b
+              end
+            end
+          RUBY
+
+          # No BUILDKITE env vars = local mode
+          determiner_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:spec_determiner 2>&1`
+          expect($?.success?).to be(true), "Spec determiner failed: #{determiner_output}"
+
+          expect(determiner_output).to include("calculator_spec.rb")
+        end
+      end
+    end
+
+    it "determines affected specs from committed changes on feature branch (local)" do
+      Bundler.with_unbundled_env do
+        Dir.chdir(tmp_dir) do
+          trace_output = `WITH_SPECTRACER_TRACING=true SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rspec --format progress 2>&1`
+          expect($?.success?).to be(true), "RSpec tracing failed: #{trace_output}"
+
+          collect_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:collect_dependencies 2>&1`
+          expect($?.success?).to be(true), "Collect dependencies failed: #{collect_output}"
+
+          system("git add -A && git commit -m 'Initial commit' --quiet", exception: true)
+          system("git checkout -b feature-branch --quiet", exception: true)
+
+          File.write("lib/greeter.rb", <<~RUBY)
+            # frozen_string_literal: true
+
+            class Greeter
+              def greet(name)
+                "Hello, \#{name}! Welcome!" # Modified on feature branch
+              end
+            end
+          RUBY
+          system("git add -A && git commit -m 'Modify greeter' --quiet", exception: true)
+
+          # No BUILDKITE env vars = local mode, compares against main branch
+          determiner_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:spec_determiner 2>&1`
+          expect($?.success?).to be(true), "Spec determiner failed: #{determiner_output}"
+
+          expect(determiner_output).to include("greeter_spec.rb")
+          expect(determiner_output).not_to include("calculator_spec.rb")
+        end
+      end
+    end
+
+    it "determines affected specs from both committed and uncommitted changes (local)" do
+      Bundler.with_unbundled_env do
+        Dir.chdir(tmp_dir) do
+          trace_output = `WITH_SPECTRACER_TRACING=true SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rspec --format progress 2>&1`
+          expect($?.success?).to be(true), "RSpec tracing failed: #{trace_output}"
+
+          collect_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:collect_dependencies 2>&1`
+          expect($?.success?).to be(true), "Collect dependencies failed: #{collect_output}"
+
+          system("git add -A && git commit -m 'Initial commit' --quiet", exception: true)
+          system("git checkout -b feature-branch --quiet", exception: true)
+
+          File.write("lib/greeter.rb", <<~RUBY)
+            # frozen_string_literal: true
+
+            class Greeter
+              def greet(name)
+                "Hello, \#{name}! Welcome!" # Committed change on branch
+              end
+            end
+          RUBY
+          system("git add -A && git commit -m 'Modify greeter' --quiet", exception: true)
+
+          File.write("lib/calculator.rb", <<~RUBY)
+            # frozen_string_literal: true
+
+            class Calculator
+              def add(a, b)
+                a + b + 0 # Uncommitted change
+              end
+
+              def subtract(a, b)
+                a - b
+              end
+            end
+          RUBY
+
+          # No BUILDKITE env vars = local mode
+          determiner_output = `SPECTRACER_TMP_DIRECTORY=#{tmp_dir} bundle exec rake spectracer:spec_determiner 2>&1`
+          expect($?.success?).to be(true), "Spec determiner failed: #{determiner_output}"
+
+          expect(determiner_output).to include("greeter_spec.rb")
+          expect(determiner_output).to include("calculator_spec.rb")
+        end
+      end
+    end
+  end
+
   describe "rake tasks" do
     it "provides spectracer:install task" do
       Bundler.with_unbundled_env do

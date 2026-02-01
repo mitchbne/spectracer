@@ -7,9 +7,10 @@ RSpec.describe Spectracer::Providers::GitChangedFiles do
   let(:env) { {} }
 
   describe "#call" do
-    context "when on default branch" do
+    context "in CI on default branch" do
       let(:env) do
         {
+          "BUILDKITE_BUILD_ID" => "12345",
           "BUILDKITE_PIPELINE_DEFAULT_BRANCH" => "main",
           "BUILDKITE_BRANCH" => "main"
         }
@@ -30,9 +31,10 @@ RSpec.describe Spectracer::Providers::GitChangedFiles do
       end
     end
 
-    context "when on feature branch" do
+    context "in CI on feature branch" do
       let(:env) do
         {
+          "BUILDKITE_BUILD_ID" => "12345",
           "BUILDKITE_PIPELINE_DEFAULT_BRANCH" => "main",
           "BUILDKITE_BRANCH" => "feature/new-thing"
         }
@@ -40,7 +42,7 @@ RSpec.describe Spectracer::Providers::GitChangedFiles do
 
       before do
         allow(git_adapter).to receive(:changed_files_against)
-          .with("main", cached: true)
+          .with("main", include_uncommitted: true)
           .and_return(["lib/new_feature.rb"])
       end
 
@@ -49,20 +51,35 @@ RSpec.describe Spectracer::Providers::GitChangedFiles do
       end
     end
 
-    context "when BUILDKITE_BRANCH is not set" do
-      let(:env) { {"BUILDKITE_PIPELINE_DEFAULT_BRANCH" => "main"} }
+    context "running locally (no BUILDKITE_BUILD_ID)" do
+      let(:env) { {} }
 
       before do
         allow(git_adapter).to receive(:current_branch)
           .and_return("feature/local")
 
-        allow(git_adapter).to receive(:changed_files_against)
-          .with("main", cached: true)
-          .and_return(["local_change.rb"])
+        allow(git_adapter).to receive(:local_changed_files)
+          .and_return(["local_change.rb", "uncommitted.rb"])
       end
 
-      it "detects current branch from git adapter" do
-        expect(provider.call).to eq(["local_change.rb"])
+      it "returns local changed files (uncommitted + branch diff)" do
+        expect(provider.call).to eq(["local_change.rb", "uncommitted.rb"])
+      end
+    end
+
+    context "running locally on main branch" do
+      let(:env) { {} }
+
+      before do
+        allow(git_adapter).to receive(:current_branch)
+          .and_return("main")
+
+        allow(git_adapter).to receive(:local_changed_files)
+          .and_return(["uncommitted_only.rb"])
+      end
+
+      it "returns uncommitted changes only" do
+        expect(provider.call).to eq(["uncommitted_only.rb"])
       end
     end
   end

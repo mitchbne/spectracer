@@ -12,11 +12,14 @@ module Spectracer
       def call
         default_branch = @env.fetch("BUILDKITE_PIPELINE_DEFAULT_BRANCH", "main")
         current_branch = @env.fetch("BUILDKITE_BRANCH") { @git_adapter.current_branch }
+        is_ci = @env.key?("BUILDKITE_BUILD_ID")
 
-        files = if current_branch == default_branch
+        files = if is_ci && current_branch == default_branch
           changed_files_for_latest_commit(current_branch)
-        else
+        elsif is_ci
           changed_files_against_default_branch(default_branch)
+        else
+          changed_files_for_local
         end
 
         @logger&.debug("Changed files: #{files.inspect}")
@@ -33,7 +36,12 @@ module Spectracer
       end
 
       def changed_files_against_default_branch(default_branch)
-        @git_adapter.changed_files_against(default_branch, cached: true)
+        @git_adapter.changed_files_against(default_branch, include_uncommitted: true)
+      end
+
+      def changed_files_for_local
+        @logger&.debug("Running locally, checking uncommitted changes + branch diff")
+        @git_adapter.local_changed_files
       end
     end
   end
