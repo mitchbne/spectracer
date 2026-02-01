@@ -4,7 +4,7 @@ set -euo pipefail
 
 export REGISTRY="$(nsc workspace describe -o json -k registry_url)"
 export SERVICE="base"
-export DOCKER_REPOSITORY="${REGISTRY}/${SERVICE}:latest"
+export DOCKER_REPOSITORY="${REGISTRY}/${SERVICE}:1.0"
 
 docker buildx build \
   --no-cache \

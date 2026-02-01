@@ -6,8 +6,9 @@ common:
 
 env:
   SPECTRACER_TMP_DIRECTORY: "tmp/spectracer"
+  BUILDKITE_ZSTASH_DEBUG: "true"
   BUNDLE_PATH: "vendor/bundle"
-  BUNDLE_FROZEN: true # Don't allow lockfile to mutate during CI
+  BUNDLE_FROZEN: 'true' # Don't allow lockfile to mutate during CI
 
 steps:
   # ============================================================================
