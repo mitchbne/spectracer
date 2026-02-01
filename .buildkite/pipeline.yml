@@ -2,7 +2,7 @@
 common:
   - buildkite_cache: &buildkite-cache
       buildkite/zstash:
-        ids: "ruby-cache"
+        ids: "ruby_cache"
 
 env:
   SPECTRACER_TMP_DIRECTORY: "tmp/spectracer"
