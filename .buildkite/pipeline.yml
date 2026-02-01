@@ -1,10 +1,8 @@
 # Spectracer CI Pipeline
-# Meta: Uses Spectracer to test Spectracer! 🔮
 common:
-  - cache_plugin: &cache-plugin
-      improbable-eng/metahook#v0.4.1:
-        pre-command: buildkite-agent cache restore --ids ruby-cache
-        post-command: buildkite-agent cache save --ids ruby-cache
+  - buildkite_cache: &buildkite-cache
+      buildkite/zstash:
+        ids: "ruby-cache"
 
 env:
   SPECTRACER_TMP_DIRECTORY: "tmp/spectracer"
