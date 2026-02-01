@@ -17,7 +17,7 @@ steps:
     key: "install-gems"
     command: |
       bundle install --jobs 4
-    plugins: [*cache-plugin]
+    plugins: [*buildkite-cache]
 
   # ============================================================================
   # Main Branch: Full suite with tracing
@@ -35,20 +35,20 @@ steps:
         artifact_paths:
           - "tmp/spectracer/**/*"
           - "tmp/rspec-results.json"
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
       - label: ":test_tube: E2E RSpec"
         key: "e2e-rspec"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
 
       - label: ":test_tube: E2E Minitest"
         key: "e2e-minitest"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
 
       - label: ":package: Collect Dependencies"
         key: "collect-deps"
@@ -61,7 +61,7 @@ steps:
           ls -la tmp/spectracer/
         artifact_paths:
           - "tmp/spectracer/dependencies.json.gz"
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
   # ============================================================================
   # Feature Branches: Run only affected specs (using Spectracer!)
   # ============================================================================
@@ -97,7 +97,7 @@ steps:
 
           # Save specs to metadata for next step
           buildkite-agent meta-data set "specs-to-run" "$$SPECS"
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
       - label: ":rspec: Run Affected Specs"
         key: "run-affected"
         depends_on: "determine-specs"
@@ -116,20 +116,20 @@ steps:
           fi
         artifact_paths:
           - "tmp/rspec-*.json"
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
       - label: ":test_tube: E2E RSpec"
         key: "e2e-rspec-branch"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/rspec_integration_spec.rb --format progress
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
 
       - label: ":test_tube: E2E Minitest"
         key: "e2e-minitest-branch"
         command: |
           bundle install --jobs 4
           bundle exec rspec spec/e2e/minitest_integration_spec.rb --format progress
-        plugins: [*cache-plugin]
+        plugins: [*buildkite-cache]
 
   # ============================================================================
   # All Branches: Build verification
@@ -140,7 +140,7 @@ steps:
     command: |
       bundle install --jobs 4
       bundle exec standardrb
-    plugins: [*cache-plugin]
+    plugins: [*buildkite-cache]
 
   - label: ":gem: Build Gem"
     key: "build-gem"
@@ -152,4 +152,4 @@ steps:
       ls -la pkg/
     artifact_paths:
       - "pkg/*.gem"
-    plugins: [*cache-plugin]
+    plugins: [*buildkite-cache]
