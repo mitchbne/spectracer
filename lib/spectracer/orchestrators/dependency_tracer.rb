@@ -7,11 +7,13 @@ module Spectracer
         paths: Spectracer::Core::Paths.new,
         store: Spectracer::IO::DependencyStore.new,
         repository: Spectracer::Providers::Repository.new,
+        path_filter: Spectracer::Core::PathFilter.new,
         logger: nil
       )
         @paths = paths
         @store = store
         @repository = repository
+        @path_filter = path_filter
         @logger = logger
         @current_spec_file = nil
         @spec_file_dependencies = Hash.new { |h, k| h[k] = Set.new }
@@ -42,6 +44,7 @@ module Spectracer
       def tracepoint
         @tracepoint ||= TracePoint.new(:call) do |tp|
           path = tp.path
+          next if @path_filter.gem_path?(path)
           next unless path.start_with?(repository_root)
           next if @current_spec_file.nil?
 

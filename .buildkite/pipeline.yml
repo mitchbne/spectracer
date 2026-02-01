@@ -60,6 +60,13 @@ steps:
           bundle exec rake spectracer:collect_dependencies
           echo "--- Dependency map created"
           ls -la tmp/spectracer/
+
+          echo "--- Uploading dependency tree annotation"
+          gunzip -c tmp/spectracer/dependencies.json.gz | ruby -rjson -e 'puts JSON.pretty_generate(JSON.parse(STDIN.read))' > tmp/spectracer/dependencies-pretty.json
+          echo '<pre><code>' > tmp/annotation.html
+          cat tmp/spectracer/dependencies-pretty.json >> tmp/annotation.html
+          echo '</code></pre>' >> tmp/annotation.html
+          buildkite-agent annotate --style "info" --context "dependency-tree" < tmp/annotation.html
         artifact_paths:
           - "tmp/spectracer/dependencies.json.gz"
         plugins: [*buildkite-cache]

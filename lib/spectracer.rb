@@ -4,6 +4,7 @@ require_relative "spectracer/version"
 require_relative "spectracer/logger"
 
 require_relative "spectracer/core/paths"
+require_relative "spectracer/core/path_filter"
 require_relative "spectracer/core/spec_selector"
 
 require_relative "spectracer/io/command_runner"

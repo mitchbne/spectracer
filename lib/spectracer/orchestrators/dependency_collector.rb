@@ -6,10 +6,12 @@ module Spectracer
       def initialize(
         paths: Spectracer::Core::Paths.new,
         store: Spectracer::IO::DependencyStore.new,
+        path_filter: Spectracer::Core::PathFilter.new,
         logger: nil
       )
         @paths = paths
         @store = store
+        @path_filter = path_filter
         @logger = logger
       end
 
@@ -38,6 +40,8 @@ module Spectracer
 
           data.each do |spec_file, dependencies|
             dependencies.each do |dep|
+              next if @path_filter.gem_path?(dep)
+
               inverse[dep] << spec_file unless inverse[dep].include?(spec_file)
             end
           end
