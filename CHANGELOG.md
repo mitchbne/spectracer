@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1] - 2026-02-01
+
+### Fixed
+
+- E2E tests now use `--initial-branch=main` for consistent git behavior across CI environments
+
 ## [1.1.0] - 2026-02-01
 
 ### Added
