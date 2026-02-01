@@ -26,7 +26,7 @@ RSpec.describe "Minitest Integration", :e2e do
 
     Bundler.with_unbundled_env do
       Dir.chdir(tmp_dir) do
-        system("git init --quiet", exception: true)
+        system("git init --quiet --initial-branch=main", exception: true)
         system("git config user.email 'test@test.com'", exception: true)
         system("git config user.name 'Test'", exception: true)
         system("bundle install --quiet", exception: true)
