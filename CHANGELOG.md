@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.0] - 2026-02-01
+
+### Added
+
+- PathFilter class to exclude gem paths from dependency tracing
+- Local pre-commit hook support: detect affected specs from uncommitted changes
+- Automatic default branch detection from `origin/HEAD` with fallback to `main`/`master`
+- E2E tests for full tracing flow, gem path filtering, and local usage scenarios
+- CI pipeline annotation step to display collected dependency tree as pretty JSON
+
+### Changed
+
+- GitAdapter now supports both CI and local modes for changed file detection
+- Changed files detection includes uncommitted changes (staged + unstaged) plus branch diff
+- Improved gem path filtering using both `Gem.path` and `Bundler.bundle_path`
+
 ## [1.0.1] - 2026-01-31
 
 ### Fixed
