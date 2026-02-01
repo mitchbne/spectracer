@@ -22,7 +22,7 @@ ENV PATH="/root/.local/bin:$PATH"
 
 # Copy version files and install Ruby
 COPY .ruby-version .tool-versions* ./
-RUN mise install && mise exec -- gem install bundler
+RUN mise install
 
 # Add mise shims to PATH for non-interactive shells
 RUN mise reshim
