@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0] - 2026-02-02
+
+### Added
+
+- Debug logging for changed files to specs mapping: when debug mode is enabled, outputs a prettified JSON map showing which specs will run for each changed file
+
 ## [1.1.1] - 2026-02-01
 
 ### Fixed
