@@ -46,6 +46,29 @@ RSpec.describe Spectracer::IO::GitAdapter do
         expect(files).to be_an(Array)
       end
     end
+
+    context "when using merge-base (triple-dot diff)" do
+      let(:git_double) { instance_double(Git::Base) }
+      let(:merge_base_commit) { instance_double(Git::Object::Commit, sha: "abc123") }
+      let(:diff_double) { instance_double(Git::Diff, stats: {files: {"file1.rb" => {}}}) }
+
+      before do
+        allow(Git).to receive(:open).and_return(git_double)
+        allow(git_double).to receive(:object).with("origin/main").and_return(double)
+        allow(git_double).to receive(:merge_base).with("origin/main", "HEAD").and_return([merge_base_commit])
+        allow(git_double).to receive(:diff).with("abc123", "HEAD").and_return(diff_double)
+      end
+
+      it "uses merge-base to find common ancestor" do
+        adapter_with_mock = described_class.new(working_dir: Dir.pwd)
+
+        files = adapter_with_mock.changed_files_against("main", include_uncommitted: false)
+
+        expect(git_double).to have_received(:merge_base).with("origin/main", "HEAD")
+        expect(git_double).to have_received(:diff).with("abc123", "HEAD")
+        expect(files).to eq(["file1.rb"])
+      end
+    end
   end
 
   describe "#local_changed_files" do

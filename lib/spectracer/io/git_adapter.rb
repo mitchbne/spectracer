@@ -36,7 +36,9 @@ module Spectracer
       def changed_files_against(target_branch, include_uncommitted: true)
         target_ref = resolve_target_ref(target_branch)
 
-        committed_files = git.diff(target_ref, "HEAD").stats[:files].keys
+        # Use merge-base to find files changed since branch diverged (equivalent to git diff target...HEAD)
+        merge_base = git.merge_base(target_ref, "HEAD").first.sha
+        committed_files = git.diff(merge_base, "HEAD").stats[:files].keys
 
         if include_uncommitted
           uncommitted_files = uncommitted_changed_files
