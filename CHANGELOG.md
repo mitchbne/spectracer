@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0] - 2026-02-02
+
+### Added
+
+- GlobFactorizer to reduce redundant spec patterns before running tests
+  - Removes concrete files already matched by broader globs
+  - Eliminates narrower globs subsumed by broader ones
+  - Example: `{spec/user/**/*_spec.rb, spec/user/**/one_spec.rb}` → `{spec/user/**/*_spec.rb}`
+
 ## [1.2.0] - 2026-02-02
 
 ### Added
