@@ -6,7 +6,8 @@ module Spectracer
   module IO
     class ConfigLoader
       FILE_PATH = ".spectracer.yml"
-      DEFAULT_FILE_PATH = File.expand_path("../../spectracer.default.yml", __dir__)
+      DEFAULT_RSPEC_FILE_PATH = File.expand_path("../../spectracer.default.yml", __dir__)
+      DEFAULT_MINITEST_FILE_PATH = File.expand_path("../../spectracer.default.minitest.yml", __dir__)
 
       def initialize(logger: nil)
         @logger = logger
@@ -29,7 +30,17 @@ module Spectracer
           YAML.safe_load_file(FILE_PATH)
         else
           @logger&.debug("No configuration file found at #{FILE_PATH.inspect}. Using defaults.")
-          YAML.safe_load_file(DEFAULT_FILE_PATH)
+          YAML.safe_load_file(default_file_path)
+        end
+      end
+
+      def default_file_path
+        if defined?(RSpec)
+          DEFAULT_RSPEC_FILE_PATH
+        elsif defined?(Minitest)
+          DEFAULT_MINITEST_FILE_PATH
+        else
+          DEFAULT_RSPEC_FILE_PATH
         end
       end
 
