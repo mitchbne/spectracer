@@ -35,6 +35,20 @@ RSpec.describe Spectracer::Core::SpecSelector do
       end
     end
 
+    context "when a minitest file itself changed" do
+      it "includes the test file" do
+        result = selector.call(
+          changed_files: ["test/models/user_test.rb"],
+          inverse_deps: {},
+          globs: {},
+          on_empty: on_empty
+        )
+
+        expect(result.specs).to eq("test/models/user_test.rb")
+        expect(result.file_to_specs_map).to eq({"test/models/user_test.rb" => ["test/models/user_test.rb"]})
+      end
+    end
+
     context "when a source file with dependencies changed" do
       it "includes specs that depend on it" do
         result = selector.call(

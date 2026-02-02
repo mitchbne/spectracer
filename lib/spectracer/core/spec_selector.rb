@@ -16,7 +16,7 @@ module Spectracer
         changed_files.each do |file|
           matched_specs = []
 
-          if file.end_with?("_spec.rb")
+          if file.end_with?("_spec.rb", "_test.rb")
             spec_set.add(file)
             matched_specs << file
           end
