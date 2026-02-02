@@ -30,7 +30,8 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        expect(result).to eq("spec/models/post_spec.rb")
+        expect(result.specs).to eq("spec/models/post_spec.rb")
+        expect(result.file_to_specs_map).to eq({"spec/models/post_spec.rb" => ["spec/models/post_spec.rb"]})
       end
     end
 
@@ -43,7 +44,8 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        expect(result).to eq("spec/models/user_spec.rb")
+        expect(result.specs).to eq("spec/models/user_spec.rb")
+        expect(result.file_to_specs_map).to eq({"app/models/user.rb" => ["spec/models/user_spec.rb"]})
       end
     end
 
@@ -56,7 +58,8 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        expect(result).to eq("spec/routing/**/*_spec.rb")
+        expect(result.specs).to eq("spec/routing/**/*_spec.rb")
+        expect(result.file_to_specs_map).to eq({"config/routes.rb" => ["spec/routing/**/*_spec.rb"]})
       end
     end
 
@@ -69,7 +72,11 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        expect(result).to eq("spec/models/post_spec.rb,spec/models/user_spec.rb")
+        expect(result.specs).to eq("spec/models/post_spec.rb,spec/models/user_spec.rb")
+        expect(result.file_to_specs_map).to eq({
+          "app/models/user.rb" => ["spec/models/user_spec.rb"],
+          "lib/shared.rb" => ["spec/models/post_spec.rb", "spec/models/user_spec.rb"]
+        })
       end
     end
 
@@ -82,7 +89,8 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        expect(result).to eq(on_empty)
+        expect(result.specs).to eq(on_empty)
+        expect(result.file_to_specs_map).to eq({})
       end
     end
 
@@ -99,10 +107,16 @@ RSpec.describe Spectracer::Core::SpecSelector do
           on_empty: on_empty
         )
 
-        specs = result.split(",")
+        specs = result.specs.split(",")
         expect(specs).to include("spec/models/custom_spec.rb")
         expect(specs).to include("spec/controllers/users_controller_spec.rb")
         expect(specs).to include("spec/routing/**/*_spec.rb")
+
+        expect(result.file_to_specs_map).to eq({
+          "spec/models/custom_spec.rb" => ["spec/models/custom_spec.rb"],
+          "app/controllers/users_controller.rb" => ["spec/controllers/users_controller_spec.rb"],
+          "config/routes.rb" => ["spec/routing/**/*_spec.rb"]
+        })
       end
     end
   end

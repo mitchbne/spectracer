@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module Spectracer
   module Orchestrators
     class SpecRunDeterminer
@@ -30,12 +32,16 @@ module Spectracer
 
         log_debug_info(config, changed_files)
 
-        @selector.call(
+        result = @selector.call(
           changed_files: changed_files,
           inverse_deps: dependencies,
           globs: config[:globs],
           on_empty: config[:on_empty_spec_set]
         )
+
+        log_file_to_specs_map(result.file_to_specs_map)
+
+        result.specs
       rescue => e
         @logger&.error("Error determining specs: #{e.message}")
         @logger&.error(e.backtrace&.join("\n"))
@@ -58,6 +64,13 @@ module Spectracer
       def log_debug_info(config, changed_files)
         @logger&.debug("Configuration: #{config.inspect}")
         @logger&.debug("Changed files: #{changed_files.inspect}")
+      end
+
+      def log_file_to_specs_map(file_to_specs_map)
+        return if file_to_specs_map.empty?
+
+        @logger&.debug("Changed files to specs mapping:")
+        @logger&.debug(JSON.pretty_generate(file_to_specs_map))
       end
     end
   end

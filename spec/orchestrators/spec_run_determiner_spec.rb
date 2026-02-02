@@ -30,12 +30,17 @@ RSpec.describe Spectracer::Orchestrators::SpecRunDeterminer do
 
   describe "#determine!" do
     it "passes data to selector and returns result" do
+      result = Spectracer::Core::SpecSelector::Result.new(
+        specs: "spec/models/user_spec.rb",
+        file_to_specs_map: {"app/models/user.rb" => ["spec/models/user_spec.rb"]}
+      )
+
       expect(selector).to receive(:call).with(
         changed_files: changed_files,
         inverse_deps: dependencies,
         globs: config[:globs],
         on_empty: config[:on_empty_spec_set]
-      ).and_return("spec/models/user_spec.rb")
+      ).and_return(result)
 
       expect(determiner.determine!).to eq("spec/models/user_spec.rb")
     end
@@ -46,12 +51,17 @@ RSpec.describe Spectracer::Orchestrators::SpecRunDeterminer do
       end
 
       it "uses empty dependencies" do
+        result = Spectracer::Core::SpecSelector::Result.new(
+          specs: "spec/smoke_spec.rb",
+          file_to_specs_map: {}
+        )
+
         expect(selector).to receive(:call).with(
           changed_files: changed_files,
           inverse_deps: {},
           globs: config[:globs],
           on_empty: config[:on_empty_spec_set]
-        ).and_return("spec/smoke_spec.rb")
+        ).and_return(result)
 
         expect(determiner.determine!).to eq("spec/smoke_spec.rb")
       end
