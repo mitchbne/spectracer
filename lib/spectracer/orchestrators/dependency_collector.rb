@@ -24,7 +24,9 @@ module Spectracer
 
         inverse_deps.each_value(&:sort!)
 
-        @store.write(inverse_deps, @paths.collected_dependencies_file)
+        output_path = @paths.collected_dependencies_file
+        @logger&.debug("Writing collected dependencies to: #{output_path}")
+        @store.write(inverse_deps, output_path)
 
         nil
       end
