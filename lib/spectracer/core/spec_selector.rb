@@ -5,6 +5,10 @@ module Spectracer
     class SpecSelector
       Result = Struct.new(:specs, :file_to_specs_map, keyword_init: true)
 
+      def initialize(factorizer: GlobFactorizer.new)
+        @factorizer = factorizer
+      end
+
       def call(changed_files:, inverse_deps:, globs:, on_empty:)
         spec_set = Set.new
         file_to_specs = {}
@@ -34,7 +38,7 @@ module Spectracer
           file_to_specs[file] = matched_specs.uniq.sort unless matched_specs.empty?
         end
 
-        files = spec_set.to_a.sort
+        files = @factorizer.call(spec_set).sort
         specs_result = files.empty? ? on_empty : files.join(",")
 
         Result.new(specs: specs_result, file_to_specs_map: file_to_specs)

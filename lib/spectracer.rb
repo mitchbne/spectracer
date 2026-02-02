@@ -5,6 +5,7 @@ require_relative "spectracer/logger"
 
 require_relative "spectracer/core/paths"
 require_relative "spectracer/core/path_filter"
+require_relative "spectracer/core/glob_factorizer"
 require_relative "spectracer/core/spec_selector"
 
 require_relative "spectracer/io/command_runner"
