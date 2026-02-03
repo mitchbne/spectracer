@@ -62,19 +62,19 @@ RSpec.describe Spectracer::Core::Paths do
   end
 
   describe "#normalize" do
-    it "converts absolute path to relative with dot prefix" do
+    it "converts absolute path to relative without dot prefix" do
       result = paths.normalize("/home/user/project/app/models/user.rb", repo_root: "/home/user/project")
-      expect(result).to eq("./app/models/user.rb")
+      expect(result).to eq("app/models/user.rb")
     end
 
-    it "adds dot prefix if not present" do
+    it "keeps path as-is if not matching repo root" do
       result = paths.normalize("app/models/user.rb", repo_root: "/somewhere/else")
-      expect(result).to eq("./app/models/user.rb")
+      expect(result).to eq("app/models/user.rb")
     end
 
-    it "preserves dot prefix if already present" do
+    it "strips dot prefix if present" do
       result = paths.normalize("./app/models/user.rb", repo_root: "/somewhere/else")
-      expect(result).to eq("./app/models/user.rb")
+      expect(result).to eq("app/models/user.rb")
     end
   end
 

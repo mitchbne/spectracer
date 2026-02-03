@@ -21,7 +21,7 @@ module Spectracer
             matched_specs << file
           end
 
-          file_key = file.start_with?("./") ? file : "./#{file}"
+          file_key = file.sub(%r{\A\./}, "")
           if (specs = inverse_deps[file_key])
             spec_set.merge(specs)
             matched_specs.concat(specs)

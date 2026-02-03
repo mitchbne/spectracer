@@ -6,9 +6,9 @@ RSpec.describe Spectracer::Core::SpecSelector do
   describe "#call" do
     let(:inverse_deps) do
       {
-        "./app/models/user.rb" => ["spec/models/user_spec.rb"],
-        "./app/controllers/users_controller.rb" => ["spec/controllers/users_controller_spec.rb"],
-        "./lib/shared.rb" => ["spec/models/user_spec.rb", "spec/models/post_spec.rb"]
+        "app/models/user.rb" => ["spec/models/user_spec.rb"],
+        "app/controllers/users_controller.rb" => ["spec/controllers/users_controller_spec.rb"],
+        "lib/shared.rb" => ["spec/models/user_spec.rb", "spec/models/post_spec.rb"]
       }
     end
 

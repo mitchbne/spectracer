@@ -120,7 +120,7 @@ RSpec.describe "RSpec Integration", :e2e do
 
           inverse_deps = Zlib::GzipReader.open(collected_file) { |gz| JSON.parse(gz.read) }
           expect(inverse_deps).to be_a(Hash)
-          expect(inverse_deps.keys).to include("./lib/calculator.rb")
+          expect(inverse_deps.keys).to include("lib/calculator.rb")
         end
       end
     end

@@ -34,8 +34,8 @@ module Spectracer
       end
 
       def normalize(file_path, repo_root:)
-        relative = file_path.sub(/\A#{Regexp.escape(repo_root)}/, ".")
-        relative.start_with?("./") ? relative : "./#{relative}"
+        relative = file_path.sub(%r{\A#{Regexp.escape(repo_root)}/?}, "")
+        relative.sub(%r{\A\./}, "")
       end
 
       def strip_dot_prefix(path)
