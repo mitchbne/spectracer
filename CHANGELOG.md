@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0] - 2026-02-04
+
+### Changed
+
+- Remove `./` prefix from traced paths for bktec/zzglob compatibility
+  - zzglob's `path.Clean()` normalizes `./spec/` to `spec/`, causing pattern mismatches
+  - Paths are now stored without the `./` prefix (e.g., `spec/models/user_spec.rb`)
+  - Output is compatible with both `bktec --test-file-pattern` and `rspec --pattern`
+
 ## [1.3.0] - 2026-02-02
 
 ### Added
