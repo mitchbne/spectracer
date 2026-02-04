@@ -17,6 +17,16 @@ RSpec.describe Spectracer::Orchestrators::DependencyTracer do
   let(:path_filter) { Spectracer::Core::PathFilter.new }
   let(:logger) { nil }
 
+  describe "#current_spec_file=" do
+    it "strips ./ prefix from spec file path" do
+      tracer.current_spec_file = "./spec/foo_spec.rb"
+
+      tracer.with_tracing { 1 + 1 }
+
+      tracer.write_output!
+    end
+  end
+
   describe "#with_tracing" do
     it "enables and disables tracepoint without error" do
       tracer.current_spec_file = "./spec/foo_spec.rb"

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spectracer (1.4.0)
+    spectracer (1.4.1)
       git (~> 2.0)
 
 GEM

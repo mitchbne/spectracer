@@ -121,6 +121,8 @@ RSpec.describe "RSpec Integration", :e2e do
           inverse_deps = Zlib::GzipReader.open(collected_file) { |gz| JSON.parse(gz.read) }
           expect(inverse_deps).to be_a(Hash)
           expect(inverse_deps.keys).to include("lib/calculator.rb")
+          expect(inverse_deps.keys.none? { |k| k.start_with?("./") }).to be(true), "Keys should not have ./ prefix"
+          expect(inverse_deps.values.flatten.none? { |v| v.start_with?("./") }).to be(true), "Values should not have ./ prefix"
         end
       end
     end

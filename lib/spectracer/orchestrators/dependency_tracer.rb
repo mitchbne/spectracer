@@ -19,7 +19,9 @@ module Spectracer
         @spec_file_dependencies = Hash.new { |h, k| h[k] = Set.new }
       end
 
-      attr_writer :current_spec_file
+      def current_spec_file=(path)
+        @current_spec_file = @paths.strip_dot_prefix(path)
+      end
 
       def with_tracing(&block)
         tracepoint.enable

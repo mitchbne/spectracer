@@ -3,7 +3,7 @@
 require "spectracer"
 
 RSpec.describe Spectracer::Orchestrators::DependencyCollector do
-  let(:paths) { instance_double(Spectracer::Core::Paths, collected_dependencies_file: "deps.json.gz", spec_artifacts_download_glob: "*.json.gz") }
+  let(:paths) { Spectracer::Core::Paths.new }
   let(:store) { instance_double(Spectracer::IO::DependencyStore) }
   let(:collector) { described_class.new(paths: paths, store: store) }
 
@@ -25,7 +25,7 @@ RSpec.describe Spectracer::Orchestrators::DependencyCollector do
       collector.collect!
 
       expect(store).to have_received(:write) do |data, _path|
-        expect(data.keys).to eq(["./lib/example.rb"])
+        expect(data.keys).to eq(["lib/example.rb"])
       end
     end
 
@@ -37,7 +37,32 @@ RSpec.describe Spectracer::Orchestrators::DependencyCollector do
       collector.collect!
 
       expect(store).to have_received(:write) do |data, _path|
-        expect(data.keys).to contain_exactly("./lib/example.rb", "./lib/other.rb")
+        expect(data.keys).to contain_exactly("lib/example.rb", "lib/other.rb")
+      end
+    end
+
+    it "strips ./ prefix from keys" do
+      allow(store).to receive(:read).with("artifact1.json.gz").and_return({
+        "./spec/example_spec.rb" => ["./lib/example.rb"]
+      })
+
+      collector.collect!
+
+      expect(store).to have_received(:write) do |data, _path|
+        expect(data.keys.none? { |k| k.start_with?("./") }).to be(true)
+      end
+    end
+
+    it "strips ./ prefix from values" do
+      allow(store).to receive(:read).with("artifact1.json.gz").and_return({
+        "./spec/example_spec.rb" => ["./lib/example.rb"]
+      })
+
+      collector.collect!
+
+      expect(store).to have_received(:write) do |data, _path|
+        expect(data.values.flatten.none? { |v| v.start_with?("./") }).to be(true)
+        expect(data["lib/example.rb"]).to eq(["spec/example_spec.rb"])
       end
     end
   end

@@ -41,10 +41,12 @@ module Spectracer
           data = @store.read(file)
 
           data.each do |spec_file, dependencies|
+            normalized_spec = @paths.strip_dot_prefix(spec_file)
             dependencies.each do |dep|
               next if @path_filter.gem_path?(dep)
 
-              inverse[dep] << spec_file unless inverse[dep].include?(spec_file)
+              normalized_dep = @paths.strip_dot_prefix(dep)
+              inverse[normalized_dep] << normalized_spec unless inverse[normalized_dep].include?(normalized_spec)
             end
           end
         end

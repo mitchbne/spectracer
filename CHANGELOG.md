@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1] - 2026-02-04
+
+### Fixed
+
+- Strip `./` prefix from collected dependency keys and values in `DependencyCollector`
+- Normalize spec file paths in `DependencyTracer` to remove `./` prefix
+
 ## [1.4.0] - 2026-02-04
 
 ### Changed
