@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require "spectracer"
+require "buildkite/test_collector"
+
+Buildkite::TestCollector.configure(hook: :rspec) if ENV["CI"]
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
